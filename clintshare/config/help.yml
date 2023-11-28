@@ -1,0 +1,46 @@
+---
+ Title: |
+   Please, enter a title that describes the type of data to be ingested. Examples:
+   • Hourly european 2m temperature from ERA5
+   • Daily regridded global tasmax from 20cr-v3
+   ...
+ Task: |
+   Please, enter only one task number. Examples:
+   • 2.5
+   • 3.2
+   ...
+ Source: |
+   Examples for different types of data:
+   • Source name for ERA5 from Copernicus Climate Data Store: https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels
+   • Source name for 20cr-v3 from NOAA data platform : https://downloads.psl.noaa.gov/Datasets/20thC_ReanV3/2mMO/
+   • Source name for ERA5-land on Levante: /work/bm1159/XCES/data4xces/reanalysis/reanalysis/ECMWF/IFS/ERA5/mon/landIce/tsn/r1i1p1
+   ...
+ Processes: |
+   Please, enter a short description of each processes which have been done on the original data. Examples:
+   • Yearly global mean with CDO, remapping to HadCRUT5 grid using CDO
+   • Masking oceans using Xarray and Shapely with Python
+   ...
+ Product: |
+   Examples for different types of data:
+   • Product name for ERA5: reanalysis
+   • Product name for 20cr-v3: reanalysis
+   • Product name for Ec-Earth3: cmip
+   ... for more examples, please have a look to Freva.
+ Institute: |
+   Examples for different types of data:
+   • Institute name for ERA5: ecmwf
+   • Institute name for 20cr-v3: noaa-cires
+   • Institute name for Ec-Earth3: ec-earth-consortium
+   ... for more examples, please have a look to Freva.
+ Model: |
+   Examples for different types of data:
+   • Model name for ERA5: ifs
+   • Model name for 20cr-v3: gfs
+   • Model name for Ec-Earth3: ec-earth3
+   ... for more examples, please have a look to Freva.
+ Experiment: |
+   Examples for different types of data:
+   • Experiment name for ERA5: era5
+   • Experiment name for 20cr-v3: 20cr-v3
+   • Experiment name for Ec-Earth3: historical or picontrol or amip or ...
+   ... for more examples, please have a look to Freva.

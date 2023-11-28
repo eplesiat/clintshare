@@ -1,0 +1,9 @@
+---
+ Title: Title of the data to be shared
+ Task: CLINT project task number
+ Source: Origin of the data (before processing). Please provide an URL or path on Levante
+ Processes: Comma-separated list of descriptions of the processes applied to the original data
+ Product: Product name of the original data
+ Institute: Institute name of the original data
+ Model: Model name of the original data
+ Experiment: Experiment name of the original data
