@@ -10,7 +10,7 @@ from .utils.mdio import read_data, write_data
 def frevadd():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', type=str, help="NetCDF files to be ingested with Freva", nargs="+")
+    parser.add_argument('files', type=strpars, help="NetCDF files to be ingested with Freva")
     parser.add_argument('-p', '--product', type=str, default=None, help="Product of original data")
     parser.add_argument("-i", "--institute", type=str, default=None, help="Institute of original data")
     parser.add_argument("-o", "--model", type=str, default=None, help="Model of original data")
@@ -28,6 +28,10 @@ def frevadd():
     num_files = len(args.files)
     print("\n* Number of files: {}".format(num_files))
     batches = np.array_split(np.arange(num_files), args.nthreads)
+
+    def exec(instruc):
+        print(">", instruc)
+        return os.popen(instruc).read()
 
     def check_status(threads):
         print("\n* Log freva add:")
@@ -48,8 +52,8 @@ def frevadd():
             self.batch = batch
 
         def run(self):
-            self.res = os.popen("freva user-data add {} --institute {} --model {} --experiment {} --ensemble {} {}"
-                     .format(*self.attributes, self.member, " ".join(map(str, self.batch)))).read()
+            self.res = exec("freva user-data add {} --institute {} --model {} --experiment {} --ensemble {} {}"
+                    .format(*self.attributes, self.member, " ".join(map(str, self.batch))))
 
     attributes = [args.product, args.institute, args.model, args.experiment]
 
@@ -57,7 +61,7 @@ def frevadd():
 
     threads = []
     for batch in batches:
-        threads.append(add_data(attributes, args.members[batch], args.files[batch]))
+        threads.append(add_data(attributes, args.members[batch][0], args.files[batch]))
         threads[-1].start()
 
     for thread in threads:
@@ -67,21 +71,22 @@ def frevadd():
     ok_index = False
     
     if ok_add:
-        res = os.popen("freva user-data index {}".format(args.path_crawl)).read()
+        res = exec("freva user-data index {}".format(args.path_crawl))
 
         print("\n* Log freva index:\n {}".format(res))
         
         if "ok" in res:
-            res = os.popen("freva databrowser project=user-{} --facet creation_time".format(args.userid)).read()
-            res = res.replace("creation_time: ","").split(",")
-
+            files = exec("freva databrowser project=user-{} product={} institute={} model={} experiment={}"
+                    .format(args.userid, *attributes)).split()
             end_time = datetime.now(timezone.utc)
+            
             print("\n* Start indexing time:", start_time)
             print("* End indexing time:", end_time)
-            print("* List of retrieved dates:", *res)
-
+            
             k = 0
-            for date in res:
+            for file in files:
+                res = exec("freva databrowser file={} --facet creation_time".format(file))
+                date = res.replace("creation_time: ","")
                 date = datetime.strptime(date.strip(), '%Y-%m-%dT%H:%M:%S.%f%z')
                 if date > start_time and date < end_time:
                     k += 1

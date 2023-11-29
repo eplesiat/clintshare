@@ -77,12 +77,16 @@ def clintshare():
     assert num_files != 0, "No NetCDF files found in {}".format(args.path_data)
     files = [os.path.abspath(file) for file in files]
     size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
+    
+    if conf_dict["nthreads"] == 0:
+        conf_dict["nthreads"] = num_files
 
     members = ["" for i in range(num_files)]
     if args.member is not None:
         members = [args.member for i in range(num_files)]
 
     if args.regex:
+        assert conf_dict["nthreads"] == num_files, "regex option requires nthreads = 0"
         members = remember(files, members, args.regex, args.varpar)
 
     ans_dict.update({"Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),

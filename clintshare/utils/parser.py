@@ -1,6 +1,7 @@
 
 import os
 import re
+import numpy as np
 
 def parspar(arg):
     assert len(arg) == 1, "parmem must be a character"
@@ -9,12 +10,14 @@ def parspar(arg):
     return pos_dict[arg]
 
 def strpars(arg):
-    return arg.split(",")
+    return np.array(arg.split(","))
 
 def remember(files, members, regex, varpar):
     num_files = len(files)
-    if members is None:
-        members = ["r1i1p1" for i in range(num_files)]
+    for i in range(num_files):
+        if members[i] == "":
+            members[i] = "r1i1p1"
+    print("* List of generated ensemble members:")
     for i in range(num_files):
         imem = int(re.search(regex, os.path.basename(files[i])).group(1))
         try:
