@@ -7,7 +7,7 @@ import yaml
 from datetime import datetime
 from .utils.frevasub import subfreva
 from .utils.mdio import read_data, write_data
-from .utils.parser import confparser
+from .utils.parser import confparser, parspar, remember
 
 def quitkeep(text):
     choice = input(text + " (y/n)\n")
@@ -22,11 +22,17 @@ def clintshare():
     parser.add_argument('path_data', type=str, help="Path of the directory containing the NetCDF files to be shared")
     parser.add_argument('-u', '--update', type=str, default=None, help="Update data using data_id")
     parser.add_argument("-a", "--account", type=str, default=None, help="Account name")
-    parser.add_argument("-m", "--mem", type=str, default=None, help="Memory in MB")
+    parser.add_argument("--mem", type=str, default=None, help="Memory in MB")
     parser.add_argument("-t", "--time", type=str, default=None, help="Time in h:mn:s")
     parser.add_argument("-l", "--nodelist", type=str, default=None, help="NODES")
     parser.add_argument("-p", "--partition", type=str, default=None, help="Partition name")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
+    parser.add_argument("-v", "--varpar", type=parspar, default="r", help="Character defining the varying member parameter:"
+                                                                       "r (for realization), i (for initial conditions),"
+                                                                       "p (for physics)")
+    parser.add_argument("-r", "--regex", type=str, default=None, help="Regex expression to parse ensemble member "
+                                                                      "from filenames (e.g., .*mem(\d+).*)")
+    parser.add_argument("-m", "--member", type=str, default=None, help="Ensemble member used for all files")
     args = parser.parse_args()
 
     path_dir = pathlib.Path(__file__).parent
@@ -70,8 +76,14 @@ def clintshare():
 
     assert num_files != 0, "No NetCDF files found in {}".format(args.path_data)
     files = [os.path.abspath(file) for file in files]
-
     size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
+
+    members = ["" for i in range(num_files)]
+    if args.member is not None:
+        members = [args.member for i in range(num_files)]
+
+    if args.regex:
+        members = remember(files, members, args.regex, args.varpar)
 
     ans_dict.update({"Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
                 "Userid": userid,
@@ -107,7 +119,7 @@ def clintshare():
 
     print("Data have been successfully registered!")
 
-    subfreva(conf_dict, ans_dict, files, userid)
+    subfreva(conf_dict, ans_dict, files, userid, members)
 
     print("Data ingestion to Freva is running in the background...")
 

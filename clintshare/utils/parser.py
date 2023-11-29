@@ -1,3 +1,32 @@
+
+import os
+import re
+
+def parspar(arg):
+    assert len(arg) == 1, "parmem must be a character"
+    pos_dict = {"r": 1, "i": 3, "p": 5}
+    assert arg in pos_dict.keys(), "parmem must be r, i or p"
+    return pos_dict[arg]
+
+def strpars(arg):
+    return arg.split(",")
+
+def remember(files, members, regex, varpar):
+    num_files = len(files)
+    if members is None:
+        members = ["r1i1p1" for i in range(num_files)]
+    for i in range(num_files):
+        imem = int(re.search(regex, os.path.basename(files[i])).group(1))
+        try:
+            imem = int(re.search(regex, os.path.basename(files[i])).group(1))
+        except:
+            print("Error! Could not extract member index from {}".format(files[i]))
+            exit()
+        members[i] = members[i][:varpar] + str(imem) + members[i][varpar + 1:]
+        print("* {} -> {}".format(files[i], members[i]))
+
+    return members
+
 def mdparser(md_text, dataid):
     k = -1
     for content in md_text:

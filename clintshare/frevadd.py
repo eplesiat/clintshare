@@ -1,6 +1,7 @@
 
 from datetime import datetime, timezone
 import argparse
+from .utils.parser import strpars
 import os
 from threading import Thread
 import numpy as np
@@ -14,6 +15,7 @@ def frevadd():
     parser.add_argument("-i", "--institute", type=str, default=None, help="Institute of original data")
     parser.add_argument("-o", "--model", type=str, default=None, help="Model of original data")
     parser.add_argument("-e", "--experiment", type=str, default=None, help="Experiment of original data")
+    parser.add_argument("-m", "--members", type=strpars, default=None, help="Comma separated list of ensemble members")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
     parser.add_argument("-c", "--path_crawl", type=str, default=None, help="Path where the crawl data will be stored")
     parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")
@@ -25,7 +27,7 @@ def frevadd():
 
     num_files = len(args.files)
     print("\n* Number of files: {}".format(num_files))
-    files = np.array_split(np.array(args.files), args.nthreads)
+    batches = np.array_split(np.arange(num_files), args.nthreads)
 
     def check_status(threads):
         print("\n* Log freva add:")
@@ -38,23 +40,24 @@ def frevadd():
 
 
     class add_data(Thread):
-        def __init__(self, attributes, batch):
+        def __init__(self, attributes, member, batch):
             Thread.__init__(self)
             self.res = None
             self.attributes = attributes
+            self.member = member
             self.batch = batch
 
         def run(self):
-            self.res = os.popen("freva user-data add {} --institute {} --model {} --experiment {} {}"
-                     .format(*self.attributes, " ".join(map(str, self.batch)))).read()
+            self.res = os.popen("freva user-data add {} --institute {} --model {} --experiment {} --ensemble {} {}"
+                     .format(*self.attributes, self.member, " ".join(map(str, self.batch)))).read()
 
     attributes = [args.product, args.institute, args.model, args.experiment]
 
     start_time = datetime.now(timezone.utc)
 
     threads = []
-    for batch in files:
-        threads.append(add_data(attributes, batch))
+    for batch in batches:
+        threads.append(add_data(attributes, args.members[batch], args.files[batch]))
         threads[-1].start()
 
     for thread in threads:
