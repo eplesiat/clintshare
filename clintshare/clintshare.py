@@ -69,6 +69,7 @@ def clintshare():
     num_files = len(files)
 
     assert num_files != 0, "No NetCDF files found in {}".format(args.path_data)
+    files = [os.path.abspath(file) for file in files]
 
     size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
 

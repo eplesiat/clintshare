@@ -22,8 +22,10 @@ def frevadd():
     files = np.array_split(np.array(args.files), args.nthreads)
 
     def check_status(threads):
-        status = "Done"
+        print("Log freva add:")
+        status = "Yes"
         for thread in threads:
+            print(thread.res)
             if "ok" not in thread.res:
                 status = "Failed"
         return status
@@ -37,7 +39,7 @@ def frevadd():
             self.batch = batch
 
         def run(self):
-            self.res = os.popen("freva user-data add {} --institute {} --model {} --experiment {} {}"
+            self.res = os.popen("freva user-data add {} --institute {} --model {} --experiment {} --override {}"
                      .format(*self.attributes, " ".join(map(str, self.batch)))).read()
 
     attributes = [args.product, args.institute, args.model, args.experiment]
@@ -52,9 +54,10 @@ def frevadd():
 
     status_add = check_status(threads)
 
-    res = os.popen("echo freva user-data index {}".format(args.path_crawl)).read()
+    res = os.popen("freva user-data index {}".format(args.path_crawl)).read()
+    print("Log freva index:\n {}".format(res))
     if "ok" in res:
-        status_index = "Done"
+        status_index = "Yes"
     else:
         status_index = "Failed"
 

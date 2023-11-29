@@ -3,7 +3,7 @@
  path_crawl: /work/bm1159/XCES/xces-work/data/crawl_my_data/user-
  account: bk1318
  mem: 128
- time: 12:00:00
+ time: 08:00:00
  nodelist: None
  partition: compute
  nthreads: 0
