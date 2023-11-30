@@ -2,6 +2,7 @@
 import os
 import re
 import numpy as np
+from .interactive import printfiles
 
 def strparser(arg):
     return np.array(arg.split(","))
@@ -14,6 +15,8 @@ def remember(files, members, regex, varpar):
     for i in range(num_files):
         if members[i] == "":
             members[i] = "r1i1p1"
+
+    memfiles = []
     print("* List of generated ensemble members:")
     for i in range(num_files):
         imem = int(re.search(regex, os.path.basename(files[i])).group(1))
@@ -23,7 +26,8 @@ def remember(files, members, regex, varpar):
             print("Error! Could not extract member index from {}".format(files[i]))
             exit()
         members[i] = members[i][:i_par[varpar]] + str(imem) + members[i][i_par[varpar] + 1:]
-        print("* {} -> {}".format(files[i], members[i]))
+        memfiles.append("{} -> {}".format(files[i], members[i]))
+    printfiles(memfiles)
 
     return members
 
