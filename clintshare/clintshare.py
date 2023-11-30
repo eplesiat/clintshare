@@ -7,12 +7,9 @@ import yaml
 from datetime import datetime
 from .utils.frevasub import subfreva
 from .utils.mdio import read_data, write_data
+from .utils.interactive import quitkeep
 from .utils.parser import confparser, remember
-
-def quitkeep(text):
-    choice = input(text + " (y/n)\n")
-    if choice.lower() == "n" or choice.lower() == "no":
-        exit()
+from .utils.frevacheck import frevacheck
 
 def clintshare():
 
@@ -117,12 +114,14 @@ def clintshare():
     if ans_dict["Product"][:6] != "clint-":
         ans_dict["Product"] = "clint-" + ans_dict["Product"]
 
+    frevacheck(ans_dict, userid)
     write_data(conf_dict["path_registry"], ans_dict, md_text, idx)
 
-    print("Data have been successfully registered!")
+    print("\nData have been successfully registered!")
 
     if args.update is not None:
         quitkeep("Do you want to re-ingest the files to Freva?")
+    
     subfreva(conf_dict, ans_dict, files, userid, members)
 
     print("Data ingestion to Freva is running in the background...")
