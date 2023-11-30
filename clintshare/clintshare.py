@@ -92,12 +92,12 @@ def clintshare():
                 "Data path": args.data_path,
                 "Number of files": num_files,
                 "Total size (in Mb)": round(size_files),
-                "CMORized": "No",
-                "Indexed": "No"
                 })
 
     if args.update is None:
         ans_dict.update({key: "" for key in keys})
+        ans_dict.update({"CMORized": "No", "Indexed": "No"})
+
     k = 0
     while k < n_queries:
         key = keys[k]

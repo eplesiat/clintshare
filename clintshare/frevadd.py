@@ -43,13 +43,14 @@ def frevadd():
                 status = False
         return status, k
 
-    def get_status(count, num_files):
+    def get_status(count, num_files, time):
+        date = time.strftime("%d/%m/%Y %H:%M:%S")
         if count == num_files:
-            return "Yes"
+            return "Yes - {}".format(date)
         elif count > num_files:
-            return "Yes ({})".format(count)
+            return "Yes ({}) - {}".format(count, date)
         else:
-            return "Failed ({})".format(count)
+            return "Failed ({}) - {}".format(count, date)
 
 
     class add_data(Thread):
@@ -100,8 +101,8 @@ def frevadd():
             print("\n* Number of files indexed: {}".format(count_index))
 
     md_text, idx, ans_dict = read_data(args.path_registry, args.dataid)
-    ans_dict["CMORized"] = get_status(count_add, num_files)
-    ans_dict["Indexed"] = get_status(count_index, num_files)
+    ans_dict["CMORized"] = get_status(count_add, num_files, end_time)
+    ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
     write_data(args.path_registry, ans_dict, md_text, idx)
 
 if __name__ == "__main__":
