@@ -24,11 +24,15 @@ cd {conf_dict["frevadd"]}
 """
 
     exec = "python -m clintshare.frevadd"
+    if ans_dict["Variable"] is None:
+        variable = ""
+    else:
+        variable = "-v '{}'".format(ans_dict["Variable"])
     
     f = open("freva-slurm.sh", "w")
     print(header, file=f)
-    print("{} {} -p {} -i {} -o {} -e {} -n {} -c {} -r {} -d {} -u {}".format(exec, os.path.abspath(ymlfile),
-                ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"],
+    print("{} {} -p {} -i {} -o {} -e {} {} -n {} -c {} -r {} -d {} -u {}".format(exec, os.path.abspath(ymlfile),
+                ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], variable,
                 conf_dict["nthreads"], conf_dict["path_crawl"] + userid, conf_dict["path_registry"], ans_dict["Dataid"], userid), file=f)
     f.close()
 

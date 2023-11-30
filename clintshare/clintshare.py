@@ -102,16 +102,20 @@ def clintshare():
         key = keys[k]
         ans = input("\n[{}/{}] {}:\n{}\r".format(k + 1, n_queries, query_dict[key], ans_dict[key])).strip()
         if ans == "":
-            if ans_dict[key] == "":
-                print(help_dict[key])
-            else:
+            if help_dict[key] is None:
+                ans_dict[key] = ans
                 k += 1
+            else:
+                if ans_dict[key] == "":
+                    print(help_dict[key])
+                else:
+                    k += 1
         elif ans == "back":
             k -= 1
         else:
             ans_dict[key] = ans
             k += 1
-
+    
     if ans_dict["Product"][:6] != "clint-":
         ans_dict["Product"] = "clint-" + ans_dict["Product"]
 

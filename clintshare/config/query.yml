@@ -7,3 +7,5 @@
  Institute: Institute name of the original data
  Model: Model name of the original data
  Experiment: Experiment name of the original data
+ Variable: Variable name of the original data (optional)
+ Comments: Please, write any additional information here (optional)

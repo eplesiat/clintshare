@@ -7,6 +7,7 @@ import os
 from threading import Thread
 import numpy as np
 from .utils.mdio import read_data, write_data
+from .utils.parser import argvar
 
 def split_list(lst, n):
     return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
@@ -19,6 +20,7 @@ def frevadd():
     parser.add_argument("-i", "--institute", type=str, default=None, help="Institute of original data")
     parser.add_argument("-o", "--model", type=str, default=None, help="Model of original data")
     parser.add_argument("-e", "--experiment", type=str, default=None, help="Experiment of original data")
+    parser.add_argument("-v", "--variable", type=str, default=None, help="Variable of original data")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
     parser.add_argument("-c", "--path_crawl", type=str, default=None, help="Path where the crawl data will be stored")
     parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")
@@ -59,16 +61,17 @@ def frevadd():
 
 
     class add_data(Thread):
-        def __init__(self, attributes, member, file):
+        def __init__(self, attributes, variable, member, file):
             Thread.__init__(self)
             self.res = None
             self.attributes = attributes
+            self.variable = variable
             self.member = member
             self.file = file
 
         def run(self):
-            self.res = exec("freva user-data add {} --institute {} --model {} --experiment {} --ensemble '{}' {}"
-                    .format(*self.attributes, self.member, self.file))
+            self.res = exec("freva user-data add {} --institute {} --model {} --experiment {} --variable '{}' --ensemble '{}' {}"
+                    .format(*self.attributes, self.variable, self.member, self.file))
 
     attributes = [args.product, args.institute, args.model, args.experiment]
 
@@ -78,7 +81,7 @@ def frevadd():
     for batch in batches:
         threads = []
         for idx in batch:
-            threads.append(add_data(attributes, *memfiles[idx]))
+            threads.append(add_data(attributes, args.variable, *memfiles[idx]))
             threads[-1].start()
 
         for thread in threads:
@@ -94,8 +97,8 @@ def frevadd():
         print("\n* Log freva index:\n {}".format(res))
         
         if "ok" in res:
-            files = exec("freva databrowser project=user-{} product={} institute={} model={} experiment={}"
-                    .format(args.userid, *attributes)).split()
+            files = exec("freva databrowser project=user-{} product={} institute={} model={} experiment={} {}"
+                    .format(args.userid, *attributes, argvar(args.variable))).split()
             end_time = datetime.now()
             
             print("\n* Start indexing time:", start_time)

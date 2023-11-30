@@ -7,6 +7,15 @@ from .interactive import printfiles
 def strparser(arg):
     return np.array(arg.split(","))
 
+def argvar(arg):
+
+    if arg is None or arg == "":
+        variable = ""
+    else:
+        variable = "variable={}".format(arg)
+    
+    return variable
+
 def remember(files, member, regex, varpar):
 
     i_par = {"r": 1, "i": 3, "p": 5}

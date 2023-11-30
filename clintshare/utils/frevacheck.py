@@ -1,12 +1,13 @@
 
 import os
 from .interactive import quitkeep, printfiles
+from .parser import argvar
 
 def frevacheck(ans_dict, userid):
 
     print("\n* Checking for indexed files...")
-    files = os.popen("module load clint xces 2>&1 >/dev/null; freva databrowser project=user-{} product={} institute={} model={} experiment={}"
-                    .format(userid, ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"])).read().split()
+    files = os.popen("module load clint xces 2>&1 >/dev/null; freva databrowser project=user-{} product={} institute={} model={} experiment={} {}"
+                    .format(userid, ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], argvar(ans_dict["Variable"]))).read().split()
     
     num_files = len(files)
     if num_files > 0:
