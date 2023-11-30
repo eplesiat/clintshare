@@ -46,6 +46,8 @@ def frevadd():
     def get_status(count, num_files):
         if count == num_files:
             return "Yes"
+        elif count > num_files:
+            return "Yes ({})".format(count)
         else:
             return "Failed ({})".format(count)
 
