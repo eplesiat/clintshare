@@ -1,5 +1,5 @@
 
-from datetime import datetime, timezone
+from datetime import datetime
 import argparse
 from .utils.parser import strparser
 import os
@@ -64,7 +64,7 @@ def frevadd():
 
     attributes = [args.product, args.institute, args.model, args.experiment]
 
-    start_time = datetime.now(timezone.utc)
+    start_time = datetime.now()
 
     threads = []
     for batch in batches:
@@ -85,15 +85,13 @@ def frevadd():
         if "ok" in res:
             files = exec("freva databrowser project=user-{} product={} institute={} model={} experiment={}"
                     .format(args.userid, *attributes)).split()
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now()
             
             print("\n* Start indexing time:", start_time)
             print("* End indexing time:", end_time)
             
             for file in files:
-                res = exec("freva databrowser file={} --facet creation_time".format(file))
-                date = res.replace("creation_time: ","")
-                date = datetime.strptime(date.strip(), '%Y-%m-%dT%H:%M:%S.%f%z')
+                date = datetime.fromtimestamp(os.path.getmtime(file))
                 if date > start_time and date < end_time:
                     count_index += 1
 
