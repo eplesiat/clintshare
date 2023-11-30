@@ -3,12 +3,6 @@ import os
 import re
 import numpy as np
 
-def parspar(arg):
-    assert len(arg) == 1, "parmem must be a character"
-    pos_dict = {"r": 1, "i": 3, "p": 5}
-    assert arg in pos_dict.keys(), "parmem must be r, i or p"
-    return pos_dict[arg]
-
 def strpars(arg):
     return np.array(arg.split(","))
 

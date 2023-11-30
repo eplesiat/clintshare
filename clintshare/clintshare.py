@@ -7,7 +7,7 @@ import yaml
 from datetime import datetime
 from .utils.frevasub import subfreva
 from .utils.mdio import read_data, write_data
-from .utils.parser import confparser, parspar, remember
+from .utils.parser import confparser, remember
 
 def quitkeep(text):
     choice = input(text + " (y/n)\n")
@@ -27,9 +27,7 @@ def clintshare():
     parser.add_argument("-l", "--nodelist", type=str, default=None, help="NODES")
     parser.add_argument("-p", "--partition", type=str, default=None, help="Partition name")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
-    parser.add_argument("-v", "--varpar", type=parspar, default="r", help="Character defining the varying member parameter:"
-                                                                       "r (for realization), i (for initial conditions),"
-                                                                       "p (for physics)")
+    parser.add_argument("-v", "--varpar", type=str, default="r", choices=["r", "i", "p"], help="Character defining the varying member parameter")
     parser.add_argument("-r", "--regex", type=str, default=None, help="Regex expression to parse ensemble member "
                                                                       "from filenames (e.g., .*mem(\d+).*)")
     parser.add_argument("-m", "--member", type=str, default=None, help="Ensemble member used for all files")
@@ -55,6 +53,7 @@ def clintshare():
     help_dict = yaml.safe_load(open(conf_dir / "help.yml", "r"))
 
     md_text, idx = None, None
+    
     if args.update is None:
         print("\nTo proceed with data sharing, it is required to answer the {} following questions.".format(n_queries))
         print("For each question, you can enter empty field for help or 'back' to go to the previous question.")
@@ -62,7 +61,6 @@ def clintshare():
         ans_dict = {"Dataid": dataid}
     else:
         md_text, idx, ans_dict = read_data(conf_dict["path_registry"], args.update)
-
         if idx is not None and userid == ans_dict["Userid"]:
 
             print("Found data registered with the following information:\n", ans_dict)
