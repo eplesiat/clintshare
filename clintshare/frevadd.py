@@ -1,7 +1,7 @@
 
 from datetime import datetime, timezone
 import argparse
-from .utils.parser import strpars
+from .utils.parser import strparser
 import os
 from threading import Thread
 import numpy as np
@@ -10,12 +10,12 @@ from .utils.mdio import read_data, write_data
 def frevadd():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', type=strpars, help="NetCDF files to be ingested with Freva")
+    parser.add_argument('files', type=strparser, help="NetCDF files to be ingested with Freva")
     parser.add_argument('-p', '--product', type=str, default=None, help="Product of original data")
     parser.add_argument("-i", "--institute", type=str, default=None, help="Institute of original data")
     parser.add_argument("-o", "--model", type=str, default=None, help="Model of original data")
     parser.add_argument("-e", "--experiment", type=str, default=None, help="Experiment of original data")
-    parser.add_argument("-m", "--members", type=strpars, default=None, help="Comma separated list of ensemble members")
+    parser.add_argument("-m", "--members", type=strparser, default=None, help="Comma separated list of ensemble members")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
     parser.add_argument("-c", "--path_crawl", type=str, default=None, help="Path where the crawl data will be stored")
     parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")

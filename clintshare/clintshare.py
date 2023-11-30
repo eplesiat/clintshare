@@ -121,6 +121,8 @@ def clintshare():
 
     print("Data have been successfully registered!")
 
+    if args.update is not None:
+        quitkeep("Do you want to re-ingest the files to Freva?")
     subfreva(conf_dict, ans_dict, files, userid, members)
 
     print("Data ingestion to Freva is running in the background...")

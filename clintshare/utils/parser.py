@@ -3,7 +3,7 @@ import os
 import re
 import numpy as np
 
-def strpars(arg):
+def strparser(arg):
     return np.array(arg.split(","))
 
 def remember(files, members, regex, varpar):
