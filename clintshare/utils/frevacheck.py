@@ -24,7 +24,7 @@ def frevacheck(ans_dict, userid):
             for file in files[-n_print:]:
                 print("..." + file[-n_chars:])
 
-    print("\nThese indexed files might differ from the new files by dates, members, variables.")
-    print("These indexed files will be overwritten if the new files have the same metadata.")
-    quitkeep("Do you want to continue?")
+        print("\nThese indexed files might differ from the new files by dates, members, variables.")
+        print("These indexed files will be overwritten if the new files have the same metadata.")
+        quitkeep("Do you want to continue?")
 
