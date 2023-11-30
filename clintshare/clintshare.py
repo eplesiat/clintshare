@@ -16,7 +16,7 @@ def clintshare():
     date = datetime.now()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('path_data', type=str, help="Path of the directory containing the NetCDF files to be shared")
+    parser.add_argument('data_path', type=str, help="Path or pattern of paths of the directories or NetCDF files to be shared")
     parser.add_argument('-u', '--update', type=str, default=None, help="Update data using data_id")
     parser.add_argument("-a", "--account", type=str, default=None, help="Account name")
     parser.add_argument("--mem", type=str, default=None, help="Memory in MB")
@@ -48,6 +48,16 @@ def clintshare():
     conf_dict["frevadd"] = pathlib.Path(__file__).parent.parent
 
     help_dict = yaml.safe_load(open(conf_dir / "help.yml", "r"))
+   
+    if os.path.isdir(args.data_path):
+        args.data_path += "/**"
+    files = [file for file in glob.glob(args.data_path, recursive=True) if file[-3:] == ".nc"]
+    num_files = len(files)
+
+    assert num_files != 0, "No NetCDF files found in provided paths."
+    print("\n* {} NetCDF files found in provided paths.".format(num_files))
+    files = [os.path.abspath(file) for file in files]
+    size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
 
     md_text, idx = None, None
     
@@ -59,19 +69,11 @@ def clintshare():
     else:
         md_text, idx, ans_dict = read_data(conf_dict["path_registry"], args.update)
         if idx is not None and userid == ans_dict["Userid"]:
-
-            print("Found data registered with the following information:\n", ans_dict)
+            print("\nFound data registered with the following information:\n", ans_dict)
             quitkeep("\nDo you want to update this data?")
         else:
             print("Error! Did find any data registered with dataid {} and userid {}.".format(args.update, userid))
             exit()
-
-    files = glob.glob(args.path_data + "/*.nc")
-    num_files = len(files)
-
-    assert num_files != 0, "No NetCDF files found in {}".format(args.path_data)
-    files = [os.path.abspath(file) for file in files]
-    size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
     
     if conf_dict["nthreads"] == 0:
         conf_dict["nthreads"] = num_files
@@ -87,7 +89,7 @@ def clintshare():
     ans_dict.update({"Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
                 "Userid": userid,
                 "username": username,
-                "Data path": args.path_data,
+                "Data path": args.data_path,
                 "Number of files": num_files,
                 "Total size (in Mb)": round(size_files),
                 "CMORized": "No",
