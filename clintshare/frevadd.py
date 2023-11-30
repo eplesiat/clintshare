@@ -23,8 +23,6 @@ def frevadd():
     parser.add_argument("-u", "--userid", type=str, default=None, help="Userid")
     args = parser.parse_args()
 
-    status = {True: "Yes", False: "Failed"}
-
     num_files = len(args.files)
     print("\n* Number of files: {}".format(num_files))
     batches = np.array_split(np.arange(num_files), args.nthreads)
@@ -36,11 +34,20 @@ def frevadd():
     def check_status(threads):
         print("\n* Log freva add:")
         status = True
+        k = 0
         for thread in threads:
             print(thread.res)
-            if "ok" not in thread.res:
+            if "ok" in thread.res:
+                k += 1
+            else:
                 status = False
-        return status
+        return status, k
+
+    def get_status(count, num_files):
+        if count == num_files:
+            return "Yes"
+        else:
+            return "Failed ({})".format(count)
 
 
     class add_data(Thread):
@@ -52,7 +59,7 @@ def frevadd():
             self.batch = batch
 
         def run(self):
-            self.res = exec("freva user-data add {} --institute {} --model {} --experiment {} --ensemble {} {}"
+            self.res = exec("freva user-data add {} --institute {} --model {} --experiment {} --ensemble '{}' {}"
                     .format(*self.attributes, self.member, " ".join(map(str, self.batch))))
 
     attributes = [args.product, args.institute, args.model, args.experiment]
@@ -67,9 +74,9 @@ def frevadd():
     for thread in threads:
         thread.join()
 
-    ok_add = check_status(threads)
-    ok_index = False
-    
+    ok_add, count_add =  check_status(threads)
+    count_index = 0
+
     if ok_add:
         res = exec("freva user-data index {}".format(args.path_crawl))
 
@@ -83,21 +90,18 @@ def frevadd():
             print("\n* Start indexing time:", start_time)
             print("* End indexing time:", end_time)
             
-            k = 0
             for file in files:
                 res = exec("freva databrowser file={} --facet creation_time".format(file))
                 date = res.replace("creation_time: ","")
                 date = datetime.strptime(date.strip(), '%Y-%m-%dT%H:%M:%S.%f%z')
                 if date > start_time and date < end_time:
-                    k += 1
+                    count_index += 1
 
-            print("\n* Number of files indexed: {}".format(k))
-            if k == num_files:
-                ok_index = True
+            print("\n* Number of files indexed: {}".format(count_index))
 
     md_text, idx, ans_dict = read_data(args.path_registry, args.dataid)
-    ans_dict["CMORized"] = status[ok_add]
-    ans_dict["Indexed"] = status[ok_index]
+    ans_dict["CMORized"] = get_status(count_add, num_files)
+    ans_dict["Indexed"] = get_status(count_index, num_files)
     write_data(args.path_registry, ans_dict, md_text, idx)
 
 if __name__ == "__main__":
