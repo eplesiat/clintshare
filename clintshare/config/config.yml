@@ -7,3 +7,4 @@
  nodelist: None
  partition: compute
  nthreads: 0
+ max_threads: 64

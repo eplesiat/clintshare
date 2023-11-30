@@ -7,28 +7,31 @@ from .interactive import printfiles
 def strparser(arg):
     return np.array(arg.split(","))
 
-def remember(files, members, regex, varpar):
+def remember(files, member, regex, varpar):
 
     i_par = {"r": 1, "i": 3, "p": 5}
-
     num_files = len(files)
-    for i in range(num_files):
-        if members[i] == "":
-            members[i] = "r1i1p1"
 
-    memfiles = []
-    print("* List of generated ensemble members:")
-    for i in range(num_files):
-        imem = int(re.search(regex, os.path.basename(files[i])).group(1))
-        try:
+    if member is None:
+        if regex is None:
+            member = ""
+        else:
+            member = "r1i1p1"
+    
+    members = [member for file in files]
+    if regex is not None:
+        
+        print("* List of generated ensemble members:")
+        for i in range(num_files):
             imem = int(re.search(regex, os.path.basename(files[i])).group(1))
-        except:
-            print("Error! Could not extract member index from {}".format(files[i]))
-            exit()
-        members[i] = members[i][:i_par[varpar]] + str(imem) + members[i][i_par[varpar] + 1:]
-        memfiles.append("{} -> {}".format(files[i], members[i]))
-    printfiles(memfiles)
-
+            try:
+                imem = int(re.search(regex, os.path.basename(files[i])).group(1))
+            except:
+                print("Error! Could not extract member index from {}".format(files[i]))
+                exit()
+            members[i] = members[i][:i_par[varpar]] + str(imem) + members[i][i_par[varpar] + 1:]
+        printfiles(["{} -> {}".format(files[i], members[i]) for i in range(num_files)])
+    
     return members
 
 def mdparser(md_text, dataid):

@@ -56,8 +56,16 @@ def clintshare():
 
     assert num_files != 0, "No NetCDF files found in provided paths."
     print("\n* {} NetCDF files found in provided paths.".format(num_files))
+
+    if conf_dict["nthreads"] == 0:
+        conf_dict["nthreads"] = num_files
+    if conf_dict["nthreads"] > conf_dict["max_threads"]:
+        conf_dict["nthreads"] = conf_dict["max_threads"]
+        print("* Number of threads has been automatically reduced to the maximum value {}".format(conf_dict["max_threads"]))
+
     files = [os.path.abspath(file) for file in files]
-    size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
+    #size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
+    size_files = 0 
 
     md_text, idx = None, None
     
@@ -75,16 +83,7 @@ def clintshare():
             print("Error! Did find any data registered with dataid {} and userid {}.".format(args.update, userid))
             exit()
     
-    if conf_dict["nthreads"] == 0:
-        conf_dict["nthreads"] = num_files
-
-    members = ["" for i in range(num_files)]
-    if args.member is not None:
-        members = [args.member for i in range(num_files)]
-
-    if args.regex:
-        assert conf_dict["nthreads"] == num_files, "regex option requires nthreads = 0"
-        members = remember(files, members, args.regex, args.varpar)
+    members = remember(files, args.member, args.regex, args.varpar)
 
     ans_dict.update({"Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
                 "Userid": userid,
@@ -124,7 +123,7 @@ def clintshare():
     if args.update is not None:
         quitkeep("Do you want to re-ingest the files to Freva?")
     
-    subfreva(conf_dict, ans_dict, files, userid, members)
+    subfreva(conf_dict, ans_dict, files, members, userid)
 
     print("Data ingestion to Freva is running in the background...")
 
