@@ -7,6 +7,9 @@ def strparser(arg):
     return np.array(arg.split(","))
 
 def remember(files, members, regex, varpar):
+
+    i_par = {"r": 1, "i": 3, "p": 5}
+
     num_files = len(files)
     for i in range(num_files):
         if members[i] == "":
@@ -19,7 +22,7 @@ def remember(files, members, regex, varpar):
         except:
             print("Error! Could not extract member index from {}".format(files[i]))
             exit()
-        members[i] = members[i][:varpar] + str(imem) + members[i][varpar + 1:]
+        members[i] = members[i][:i_par[varpar]] + str(imem) + members[i][i_par[varpar] + 1:]
         print("* {} -> {}".format(files[i], members[i]))
 
     return members
