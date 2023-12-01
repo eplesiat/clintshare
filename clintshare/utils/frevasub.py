@@ -17,9 +17,7 @@ def subfreva(conf_dict, ans_dict, files, members, username):
 #SBATCH --mem={conf_dict["mem"]}G
 #SBATCH --partition={conf_dict["partition"]}
 
-module load clint xces
-
-cd {conf_dict["frevadd"]}
+module load clint xces share
 
 """
 
