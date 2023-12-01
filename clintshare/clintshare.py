@@ -10,6 +10,7 @@ from .utils.mdio import read_data, write_data
 from .utils.interactive import quitkeep
 from .utils.parser import confparser, remember
 from .utils.frevacheck import frevacheck
+from .utils.commit import commit_registry
 
 def clintshare():
 
@@ -42,6 +43,7 @@ def clintshare():
     dataid = date.strftime("%d%m%Y.%H%M%S")
     userid = os.popen("echo $USER").read().strip()
     username = os.popen("pinky -lb $USER").read().strip().split(":")[-1].strip()
+    projectdir = "user-" + userid
 
     conf_dict = yaml.safe_load(open(conf_dir / "config.yml", "r"))
     conf_dict = confparser(conf_dict, args)
@@ -119,17 +121,18 @@ def clintshare():
     if ans_dict["Product"][:6] != "clint-":
         ans_dict["Product"] = "clint-" + ans_dict["Product"]
 
-    frevacheck(ans_dict, userid)
+    frevacheck(ans_dict, projectdir)
     write_data(conf_dict["path_registry"], ans_dict, md_text, idx)
+    commit_registry(conf_dict["path_repo"], conf_dict["path_registry"], username, update=args.update, verbose=False)
 
-    print("\nData have been successfully registered!")
+    print("\n* Data have been successfully registered!")
 
     if args.update is not None:
         quitkeep("Do you want to re-ingest the files to Freva?")
     
-    subfreva(conf_dict, ans_dict, files, members, userid)
+    subfreva(conf_dict, ans_dict, files, members, username, projectdir)
 
-    print("Data ingestion to Freva is running in the background...")
+    print("* Data ingestion is running in the background...")
 
 if __name__ == "__main__":
     clintshare()

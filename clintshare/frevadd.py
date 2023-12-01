@@ -7,7 +7,9 @@ import os
 from threading import Thread
 import numpy as np
 from .utils.mdio import read_data, write_data
+from .utils.interactive import exec
 from .utils.parser import argvar
+from .utils.commit import commit_registry
 
 def split_list(lst, n):
     return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
@@ -18,14 +20,16 @@ def frevadd():
     parser.add_argument('ymlfile', type=str, help="Yaml containing the NetCDF files and their associated members to be ingested with Freva")
     parser.add_argument('-p', '--product', type=str, default=None, help="Product of original data")
     parser.add_argument("-i", "--institute", type=str, default=None, help="Institute of original data")
-    parser.add_argument("-o", "--model", type=str, default=None, help="Model of original data")
+    parser.add_argument("-m", "--model", type=str, default=None, help="Model of original data")
     parser.add_argument("-e", "--experiment", type=str, default=None, help="Experiment of original data")
     parser.add_argument("-v", "--variable", type=str, default=None, help="Variable of original data")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
     parser.add_argument("-c", "--path_crawl", type=str, default=None, help="Path where the crawl data will be stored")
+    parser.add_argument("-g", "--path_repo", type=str, default=None, help="Path of the git repository")
     parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")
-    parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
-    parser.add_argument("-u", "--userid", type=str, default=None, help="Userid")
+    parser.add_argument("-l", "--dataid", type=str, default=None, help="Dataid")
+    parser.add_argument("-u", "--username", type=str, default=None, help="Username")
+    parser.add_argument("-d", "--projectdir", type=str, default=None, help="Project directory")
     args = parser.parse_args()
     
     with open(args.ymlfile, "r") as f:
@@ -35,10 +39,6 @@ def frevadd():
     print("\n* Number of files: {}".format(num_files))
     #batches = np.array_split(np.arange(num_files), args.nthreads)
     batches = split_list(np.arange(num_files), args.nthreads)
-
-    def exec(instruc):
-        print(">", instruc)
-        return os.popen(instruc).read()
 
     def check_status(threads, ok_add, count_add):
         print("\n* Log freva add:")
@@ -92,13 +92,13 @@ def frevadd():
     count_index = 0
 
     if ok_add:
-        res = exec("freva user-data index {}".format(args.path_crawl))
+        res = exec("freva user-data index {}/{}".format(args.path_crawl, args.projectdir))
 
         print("\n* Log freva index:\n {}".format(res))
         
         if "ok" in res:
-            files = exec("freva databrowser project=user-{} product={} institute={} model={} experiment={} {}"
-                    .format(args.userid, *attributes, argvar(args.variable))).split()
+            files = exec("freva databrowser project={} product={} institute={} model={} experiment={} {}"
+                    .format(args.projectdir, *attributes, argvar(args.variable))).split()
             end_time = datetime.now()
             
             print("\n* Start indexing time:", start_time)
@@ -115,6 +115,7 @@ def frevadd():
     ans_dict["CMORized"] = get_status(count_add, num_files, end_time)
     ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
     write_data(args.path_registry, ans_dict, md_text, idx)
+    commit_registry(args.path_repo, args.path_registry, args.username, ingest=True) 
 
 if __name__ == "__main__":
     frevadd()

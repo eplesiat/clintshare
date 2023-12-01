@@ -5,7 +5,7 @@ import numpy as np
 from .interactive import printfiles
 
 def strparser(arg):
-    return np.array(arg.split(","))
+    return arg.split(",")
 
 def argvar(arg):
 

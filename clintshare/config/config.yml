@@ -1,6 +1,7 @@
 ---
- path_registry: /work/bk1318/Data_Repository/Shared_Data.md
- path_crawl: /work/bm1159/XCES/xces-work/data/crawl_my_data/user-
+ path_registry: /work/bk1318/test-data-repo/Shared_Data.md
+ path_repo: /work/bk1318/test-data-repo
+ path_crawl: /work/bm1159/XCES/xces-work/data/crawl_my_data
  account: bk1318
  mem: 128
  time: 08:00:00
