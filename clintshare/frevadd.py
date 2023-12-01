@@ -24,12 +24,11 @@ def frevadd():
     parser.add_argument("-e", "--experiment", type=str, default=None, help="Experiment of original data")
     parser.add_argument("-v", "--variable", type=str, default=None, help="Variable of original data")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
-    parser.add_argument("-c", "--path_crawl", type=str, default=None, help="Path where the crawl data will be stored")
+    parser.add_argument("-j", "--project", type=str, default=None, help="Project")
     parser.add_argument("-g", "--path_repo", type=str, default=None, help="Path of the git repository")
     parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")
-    parser.add_argument("-l", "--dataid", type=str, default=None, help="Dataid")
+    parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
     parser.add_argument("-u", "--username", type=str, default=None, help="Username")
-    parser.add_argument("-d", "--projectdir", type=str, default=None, help="Project directory")
     args = parser.parse_args()
     
     with open(args.ymlfile, "r") as f:
@@ -70,10 +69,10 @@ def frevadd():
             self.file = file
 
         def run(self):
-            self.res = exec("freva user-data add {} --institute {} --model {} --experiment {} --variable '{}' --ensemble '{}' {}"
+            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {} --variable '{}' --ensemble '{}' {}"
                     .format(*self.attributes, self.variable, self.member, self.file))
 
-    attributes = [args.product, args.institute, args.model, args.experiment]
+    attributes = [args.product, args.project, args.institute, args.model, args.experiment]
 
     start_time = datetime.now()
 
@@ -89,31 +88,29 @@ def frevadd():
 
         ok_add, count_add = check_status(threads, ok_add, count_add)
 
-    count_index = 0
-
-    if ok_add:
-        res = exec("freva user-data index {}/{}".format(args.path_crawl, args.projectdir))
-
-        print("\n* Log freva index:\n {}".format(res))
-        
-        if "ok" in res:
-            files = exec("freva databrowser project={} product={} institute={} model={} experiment={} {}"
-                    .format(args.projectdir, *attributes, argvar(args.variable))).split()
-            end_time = datetime.now()
-            
-            print("\n* Start indexing time:", start_time)
-            print("* End indexing time:", end_time)
-            
-            for file in files:
-                date = datetime.fromtimestamp(os.path.getmtime(file))
-                if date > start_time and date < end_time:
-                    count_index += 1
-
-            print("\n* Number of files indexed: {}".format(count_index))
-
+    print("\n* Number of files CMORized: {}".format(count_add))
     md_text, idx, ans_dict = read_data(args.path_registry, args.dataid)
-    ans_dict["CMORized"] = get_status(count_add, num_files, end_time)
-    ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
+
+    if not ok_add:
+        ans_dict["Indexed"] = get_status(count_add, num_files, end_time)
+    else:
+        files = exec("freva databrowser product={} project={} institute={} model={} experiment={} {}"
+                    .format(*attributes, argvar(args.variable))).split()
+        
+        end_time = datetime.now()
+        print("\n* Start indexing time:", start_time)
+        print("* End indexing time:", end_time)
+
+        count_index = 0
+        for file in files:
+            date = datetime.fromtimestamp(os.path.getmtime(file))
+            if date > start_time and date < end_time:
+                count_index += 1
+
+        print("\n* Number of files indexed: {}".format(count_index))
+
+        ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
+
     write_data(args.path_registry, ans_dict, md_text, idx)
     commit_registry(args.path_repo, args.path_registry, args.username, ingest=True) 
 

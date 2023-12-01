@@ -13,9 +13,9 @@ def commit_registry(path_repo, path_registry, username, update=None, ingest=Fals
             message =  "Update existing data in registry"
     else:
         message =  "Change status of data in registry"
-    
+   
     cmd = "git -C {}".format(path_repo)
+    cmd = "module load git; {} config user.name '{}' ; {} config user.email None; {}".format(cmd, username, cmd, cmd)
 
-    exec("module load git; {} config user.name '{}'; {} config user.email None".format(cmd, username, cmd), verbose=verbose)
     exec("{} add {}".format(cmd, path_registry), verbose=verbose)
     exec("{} commit -m '{}'".format(cmd, message), verbose=verbose)
