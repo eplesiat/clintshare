@@ -89,7 +89,7 @@ def clintshare():
 
     ans_dict.update({"Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
                 "Userid": userid,
-                "username": username,
+                "Username": username,
                 "Data path": args.data_path,
                 "Number of files": num_files,
                 "Total size (in Mb)": round(size_files),
