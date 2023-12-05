@@ -10,6 +10,32 @@ def quitkeep(text):
     if choice.lower() == "n" or choice.lower() == "no":
         exit()
 
+def form(query_dict, ans_dict, help_dict, keys):
+    n_queries = len(keys)
+    k = 0
+    while k < n_queries:
+        key = keys[k]
+        ans = input("\n[{}/{}] {}:\n{}\r".format(k + 1, n_queries, query_dict[key], ans_dict[key])).strip()
+        if ans == "":
+            if help_dict[key] is None:
+                ans_dict[key] = ans
+                k += 1
+            else:
+                if ans_dict[key] == "":
+                    print(help_dict[key])
+                else:
+                    k += 1
+        elif ans == "back":
+            k -= 1
+        else:
+            ans_dict[key] = ans
+            k += 1
+
+    if ans_dict["Product"][:7] != userid:
+        ans_dict["Product"] = userid + "-" + ans_dict["Product"]
+
+    return ans_dict
+
 def printfiles(files):
 
     n_print = 5

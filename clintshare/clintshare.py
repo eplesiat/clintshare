@@ -7,7 +7,7 @@ import yaml
 from datetime import datetime
 from .utils.frevasub import subfreva
 from .utils.mdio import read_data, write_data
-from .utils.interactive import quitkeep
+from .utils.interactive import quitkeep, form
 from .utils.parser import confparser, remember
 from .utils.frevacheck import frevacheck
 from .utils.commit import commit_registry
@@ -98,29 +98,8 @@ def clintshare():
     if args.update is None:
         ans_dict.update({key: "" for key in keys})
         ans_dict.update({"Indexed": "No"})
-
-    n_queries = len(keys)
-    k = 0
-    while k < n_queries:
-        key = keys[k]
-        ans = input("\n[{}/{}] {}:\n{}\r".format(k + 1, n_queries, query_dict[key], ans_dict[key])).strip()
-        if ans == "":
-            if help_dict[key] is None:
-                ans_dict[key] = ans
-                k += 1
-            else:
-                if ans_dict[key] == "":
-                    print(help_dict[key])
-                else:
-                    k += 1
-        elif ans == "back":
-            k -= 1
-        else:
-            ans_dict[key] = ans
-            k += 1
     
-    if ans_dict["Product"][:7] != userid:
-        ans_dict["Product"] = userid + "-" + ans_dict["Product"]
+    ans_dict = form(query_dict, ans_dict, help_dict, keys)
 
     frevacheck(ans_dict, conf_dict["project"])
     write_data(conf_dict["path_registry"], ans_dict, md_text, idx)
