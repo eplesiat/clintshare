@@ -96,7 +96,7 @@ def clintshare():
     print("\n* Data have been successfully registered!")
 
     quitkeep("Do you want to (re-)ingest the files using Freva?")
-    subfreva(conf_dict, ans_dict, files, members, username)
+    subfreva(conf_dict, ans_dict, files, members, username, dataid)
     print("* Data ingestion is running in the background...")
 
 if __name__ == "__main__":

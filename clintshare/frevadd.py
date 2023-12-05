@@ -29,6 +29,7 @@ def frevadd():
     parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")
     parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
     parser.add_argument("-u", "--username", type=str, default=None, help="Username")
+    parser.add_argument("-c", "--clean_tmp", action='store_true', help="Clean temporary files")
     args = parser.parse_args()
     
     with open(args.ymlfile, "r") as f:
@@ -114,6 +115,9 @@ def frevadd():
     
     if not ok_add or not ok_index:
         exit()
+    
+    if args.clean_tmp:
+        os.remove(args.ymlfile)
 
 if __name__ == "__main__":
     frevadd()

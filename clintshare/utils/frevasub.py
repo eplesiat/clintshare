@@ -1,16 +1,16 @@
 import os
 import yaml
 
-def subfreva(conf_dict, ans_dict, files, members, username):
+def subfreva(conf_dict, ans_dict, files, members, username, dataid):
     
-    ymlfile = "memfiles.yml"
+    ymlfile = "{}/memfiles_{}.yml".format(conf_dict["path_tmp"], dataid)
     with open(ymlfile, "w") as f:
         yaml.dump([list(i) for i in zip(members, files)], f)
 
     header = f"""#!/usr/bin/env bash
     
 #SBATCH -J frevadd
-#SBATCH --output frevadd_%j.log
+#SBATCH --output {conf_dict["path_log"]}/frevadd_%j.log
 #SBATCH --account={conf_dict["account"]}
 #SBATCH --cpus-per-task={conf_dict["nthreads"]}
 #SBATCH --time={conf_dict["time"]}
@@ -23,18 +23,26 @@ module load clint xces share
 
 """
 
-    cmd = "python -m clintshare.frevadd"
+    cmd = "frevadd"
     if ans_dict["Variable"] is None:
         variable = ""
     else:
         variable = "-v '{}'".format(ans_dict["Variable"])
+
+    if conf_dict["clean_tmp"]:
+        clean_tmp = "-c"
+    else:
+        clean_tmp = ""
     
-    f = open("freva-slurm.sh", "w")
+    slurmfile = "{}/slurm_{}.sh".format(conf_dict["path_tmp"], dataid)
+    f = open(slurmfile, "w")
     print(header, file=f)
-    print("{} {} -p {} -i {} -m {} -e {} {} -n {} -j {} -g {} -r {} -d {} -u '{}'".format(cmd, os.path.abspath(ymlfile),
+    print("{} {} -p {} -i {} -m {} -e {} {} -n {} -j {} -g {} -r {} -d {} -u '{}' {}".format(cmd, ymlfile,
                 ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], variable,
                 conf_dict["nthreads"], conf_dict["project"], conf_dict["path_repo"], conf_dict["path_registry"],
-                ans_dict["Dataid"], username), file=f)
+                ans_dict["Dataid"], username, clean_tmp), file=f)
     f.close()
 
-    os.system("sbatch freva-slurm.sh")
+    os.system("sbatch {}".format(slurmfile))
+    if conf_dict["clean_tmp"]:
+        os.remove(slurmfile)

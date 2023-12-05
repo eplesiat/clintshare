@@ -1,0 +1,15 @@
+---
+ path_registry: /work/bk1318/test-data-repo/Shared_Data.md
+ path_repo: /work/bk1318/test-data-repo
+ path_log: /work/bk1318/clint-eu/logs
+ path_tmp: /work/bk1318/clint-eu/logs/tmp
+ clean_tmp: True
+ project: clint
+ account: bk1318
+ email: plesiat@dkrz.de
+ mem: 128
+ time: 08:00:00
+ nodelist: None
+ partition: compute
+ nthreads: 0
+ max_threads: 64
