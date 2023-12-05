@@ -10,7 +10,14 @@ def quitkeep(text):
     if choice.lower() == "n" or choice.lower() == "no":
         exit()
 
-def form(query_dict, ans_dict, help_dict, keys):
+def ans2bool(text):
+    choice = input(text + " (y/n)\n")
+    if choice.lower() == "n" or choice.lower() == "no":
+        return False
+    else:
+        return True
+
+def form(query_dict, ans_dict, help_dict, keys, userid):
     n_queries = len(keys)
     k = 0
     while k < n_queries:

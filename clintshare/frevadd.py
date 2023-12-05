@@ -51,10 +51,8 @@ def frevadd():
 
     def get_status(count, num_files, time):
         date = time.strftime("%d/%m/%Y %H:%M:%S")
-        if count == num_files:
-            return "Yes - {}".format(date)
-        elif count > num_files:
-            return "Yes ({}) - {}".format(count, date)
+        if count >= num_files:
+            return "{} files - {}".format(count, date)
         else:
             return "Failed ({}) - {}".format(count, date)
 
@@ -92,7 +90,7 @@ def frevadd():
     md_text, idx, ans_dict = read_data(args.path_registry, args.dataid)
 
     if not ok_add:
-        ans_dict["Indexed"] = get_status(count_add, num_files, end_time)
+        ans_dict["Indexed"] = get_status(count_add, num_files, start_time)
     else:
         files = exec("freva databrowser product={} project={} institute={} model={} experiment={} {}"
                     .format(*attributes, argvar(args.variable))).split()

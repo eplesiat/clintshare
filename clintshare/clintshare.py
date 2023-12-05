@@ -8,7 +8,7 @@ from datetime import datetime
 from .utils.frevasub import subfreva
 from .utils.mdio import read_data, write_data
 from .utils.interactive import quitkeep, form
-from .utils.parser import confparser, remember
+from .utils.parser import confparser, remember, create_dict
 from .utils.frevacheck import frevacheck
 from .utils.commit import commit_registry
 
@@ -55,7 +55,7 @@ def clintshare():
     files = [file for file in glob.glob(args.data_path, recursive=True) if file[-3:] == ".nc"]
     num_files = len(files)
 
-    assert num_files != 0, "No NetCDF files found in provided paths."
+    assert len(files) != 0, "No NetCDF files found in provided paths."
     print("\n* {} NetCDF files found in provided paths.".format(num_files))
 
     if conf_dict["nthreads"] == 0:
@@ -65,8 +65,6 @@ def clintshare():
         print("* Number of threads has been automatically reduced to the maximum value {}".format(conf_dict["max_threads"]))
 
     files = [os.path.abspath(file) for file in files]
-    #size_files = round(sum(os.path.getsize(file) for file in files) / (1024 ** 2))
-    size_files = 0 
 
     md_text, idx = None, None
     
@@ -75,31 +73,22 @@ def clintshare():
         print("For each question, you can enter empty field for help or 'back' to go to the previous question.")
         quitkeep("Do you want to continue?")
         ans_dict = {"Dataid": dataid}
+        index_data = True
     else:
         md_text, idx, ans_dict = read_data(conf_dict["path_registry"], args.update)
-        if idx is not None and userid == ans_dict["Userid"]:
+        if idx is not None and userid == ans_dict["Userid"] and args.data_path == ans_dict["Data path"]:
             print("\nFound data registered with the following information:\n", ans_dict)
             quitkeep("\nDo you want to update this data?")
         else:
-            print("Error! Did find any data registered with dataid {} and userid {}.".format(args.update, userid))
+            print("Error! Did not find any data registered with dataid {}, userid {} and data path {}."
+                    .format(args.update, userid, args.data_path))
             exit()
+
         keys = [key for key in keys if key not in filter_dict]
     
     members = remember(files, args.member, args.regex, args.varpar)
-
-    ans_dict.update({"Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
-                "Userid": userid,
-                "Username": username,
-                "Data path": args.data_path,
-                "Number of files": num_files,
-                "Total size (in Mb)": size_files,
-                })
-
-    if args.update is None:
-        ans_dict.update({key: "" for key in keys})
-        ans_dict.update({"Indexed": "No"})
-    
-    ans_dict = form(query_dict, ans_dict, help_dict, keys)
+    ans_dict = create_dict(ans_dict, date, userid, username, args.data_path, files, keys)
+    ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)
 
     frevacheck(ans_dict, conf_dict["project"])
     write_data(conf_dict["path_registry"], ans_dict, md_text, idx)
@@ -107,11 +96,8 @@ def clintshare():
 
     print("\n* Data have been successfully registered!")
 
-    if args.update is not None:
-        quitkeep("Do you want to re-ingest the files to Freva?")
-    
+    quitkeep("Do you want to (re-)ingest the files using Freva?")
     subfreva(conf_dict, ans_dict, files, members, username)
-
     print("* Data ingestion is running in the background...")
 
 if __name__ == "__main__":

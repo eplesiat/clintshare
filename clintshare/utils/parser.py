@@ -43,6 +43,42 @@ def remember(files, member, regex, varpar):
     
     return members
 
+def update_dict(ans_dict, key, val, update=True, keep_same=False):
+    if key in ans_dict:
+        if update:
+            if not keep_same or ans_dict[key] != val:
+                ans_dict[key] += ", " + val
+    else:
+        ans_dict[key] = val
+    return ans_dict
+
+def create_dict(ans_dict, date, userid, username, data_path, files, keys):
+
+    num_files = str(len(files))
+    #size_files = round(sum(os.path.getsize(file) for file in files) / (1024 ** 2))
+    size_files = str(0)
+
+    ans_dict.update({
+        "Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
+        "Userid": userid,
+        "Username": username,
+        "Data path": data_path,
+        "Number of added files": num_files,
+        "Total size (in Mb)": size_files})
+
+    #ans_dict = update_dict(ans_dict, "Data path", data_path, keep_same=True)
+    #ans_dict = update_dict(ans_dict, "Number of added files", num_files, update=index_data)
+    #ans_dict = update_dict(ans_dict, "Total size (in Mb)", size_files, update=index_data)
+
+    for key in keys:
+        if key not in ans_dict:
+            ans_dict[key] = ""
+    
+    if "Indexed" not in ans_dict:
+        ans_dict.update({"Indexed": "No"})
+
+    return ans_dict
+
 def mdparser(md_text, dataid):
     k = -1
     for content in md_text:
