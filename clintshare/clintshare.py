@@ -80,9 +80,8 @@ def clintshare():
             print("\nFound data registered with the following information:\n", ans_dict)
             quitkeep("\nDo you want to update this data?")
         else:
-            print("Error! Did not find any data registered with dataid {}, userid {} and data path {}."
+            raise Exception("Did not find any data registered with dataid {}, userid {} and data path {}."
                     .format(args.update, userid, args.data_path))
-            exit()
 
         keys = [key for key in keys if key not in filter_dict]
     

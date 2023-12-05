@@ -52,9 +52,9 @@ def frevadd():
     def get_status(count, num_files, time):
         date = time.strftime("%d/%m/%Y %H:%M:%S")
         if count >= num_files:
-            return "{} files - {}".format(count, date)
+            return True, "{} files - {}".format(count, date)
         else:
-            return "Failed ({}) - {}".format(count, date)
+            return False, "Failed ({}) - {}".format(count, date)
 
 
     class add_data(Thread):
@@ -107,10 +107,13 @@ def frevadd():
 
         print("\n* Number of files indexed: {}".format(count_index))
 
-        ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
+        ok_index, ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
 
     write_data(args.path_registry, ans_dict, md_text, idx)
     commit_registry(args.path_repo, args.path_registry, args.username, ingest=True) 
+    
+    if not ok_add or not ok_index:
+        exit()
 
 if __name__ == "__main__":
     frevadd()

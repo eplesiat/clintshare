@@ -7,8 +7,7 @@ def read_data(path_registry, dataid):
         md_text = re.split(r'\n(?=#)', open(path_registry).read())
         return md_text, *mdparser(md_text, dataid)
     except:
-        print("Error! Could not parse registry.")
-        exit()
+        raise Exception("Could not parse registry.")
 
 def write_data(path_registry, ans_dict, md_text, idx):
 

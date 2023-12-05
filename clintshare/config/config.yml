@@ -3,6 +3,7 @@
  path_repo: /work/bk1318/test-data-repo
  project: clint
  account: bk1318
+ email: plesiat@dkrz.de
  mem: 128
  time: 08:00:00
  nodelist: None

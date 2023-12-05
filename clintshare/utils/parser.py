@@ -36,8 +36,7 @@ def remember(files, member, regex, varpar):
             try:
                 imem = int(re.search(regex, os.path.basename(files[i])).group(1))
             except:
-                print("Error! Could not extract member index from {}".format(files[i]))
-                exit()
+                raise Exception("Could not extract member index from {}".format(files[i]))
             members[i] = members[i][:i_par[varpar]] + str(imem) + members[i][i_par[varpar] + 1:]
         printfiles(["{} -> {}".format(files[i], members[i]) for i in range(num_files)])
     

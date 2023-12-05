@@ -16,6 +16,8 @@ def subfreva(conf_dict, ans_dict, files, members, username):
 #SBATCH --time={conf_dict["time"]}
 #SBATCH --mem={conf_dict["mem"]}G
 #SBATCH --partition={conf_dict["partition"]}
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user={conf_dict["email"]}
 
 module load clint xces share
 
