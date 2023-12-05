@@ -33,7 +33,7 @@ def clintshare():
 
     path_dir = pathlib.Path(__file__).parent
     conf_dir = path_dir / "config"
-    query_dict = yaml.safe_load(open(conf_dir / "query.yml", "r"))
+    query_dict, filter_dict = yaml.safe_load(open(conf_dir / "query.yml", "r"))
 
     keys = list(query_dict.keys())
     n_queries = len(keys)
@@ -65,7 +65,7 @@ def clintshare():
         print("* Number of threads has been automatically reduced to the maximum value {}".format(conf_dict["max_threads"]))
 
     files = [os.path.abspath(file) for file in files]
-    #size_files = sum(os.path.getsize(file) for file in files) / (1024 ** 2)
+    #size_files = round(sum(os.path.getsize(file) for file in files) / (1024 ** 2))
     size_files = 0 
 
     md_text, idx = None, None
@@ -83,6 +83,7 @@ def clintshare():
         else:
             print("Error! Did find any data registered with dataid {} and userid {}.".format(args.update, userid))
             exit()
+        keys = [key for key in keys if key not in filter_dict]
     
     members = remember(files, args.member, args.regex, args.varpar)
 
@@ -91,13 +92,14 @@ def clintshare():
                 "Username": username,
                 "Data path": args.data_path,
                 "Number of files": num_files,
-                "Total size (in Mb)": round(size_files),
+                "Total size (in Mb)": size_files,
                 })
 
     if args.update is None:
         ans_dict.update({key: "" for key in keys})
         ans_dict.update({"Indexed": "No"})
 
+    n_queries = len(keys)
     k = 0
     while k < n_queries:
         key = keys[k]
