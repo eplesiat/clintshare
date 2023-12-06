@@ -6,10 +6,10 @@ from .utils.parser import strparser
 import os
 from threading import Thread
 import numpy as np
-from .utils.mdio import read_data, write_data
+from .utils.catalog_io import read_data, write_data
 from .utils.interactive import exec
 from .utils.parser import argvar
-from .utils.commit import commit_registry
+from .utils.commit import commit_catalog
 
 def split_list(lst, n):
     return [lst[i * n:(i + 1) * n] for i in range((len(lst) + n - 1) // n )]
@@ -25,11 +25,13 @@ def frevadd():
     parser.add_argument("-v", "--variable", type=str, default=None, help="Variable of original data")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
     parser.add_argument("-j", "--project", type=str, default=None, help="Project")
-    parser.add_argument("-g", "--path_repo", type=str, default=None, help="Path of the git repository")
-    parser.add_argument("-r", "--path_registry", type=str, default=None, help="Path of the registry")
+    parser.add_argument("-r", "--path_repo", type=str, default=None, help="Path of the git repository")
+    parser.add_argument("-c", "--path_catalog", type=str, default=None, help="Path of the catalog")
+    parser.add_argument("-h", "--path_header", type=str, default=None, help="Path of the header")
+    parser.add_argument("-k", "--path_markdown", type=str, default=None, help="Path of the markdown")
     parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
     parser.add_argument("-u", "--username", type=str, default=None, help="Username")
-    parser.add_argument("-c", "--clean_tmp", action='store_true', help="Clean temporary files")
+    parser.add_argument("-t", "--clean_tmp", action='store_true', help="Clean temporary files")
     args = parser.parse_args()
     
     with open(args.ymlfile, "r") as f:
@@ -88,7 +90,7 @@ def frevadd():
         ok_add, count_add = check_status(threads, ok_add, count_add)
 
     print("\n* Number of files CMORized: {}".format(count_add))
-    md_text, idx, ans_dict = read_data(args.path_registry, args.dataid)
+    catalog, ans_dict = read_data(args.path_catalog, args.dataid)
 
     if not ok_add:
         ans_dict["Indexed"] = get_status(count_add, num_files, start_time)
@@ -110,8 +112,9 @@ def frevadd():
 
         ok_index, ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
 
-    write_data(args.path_registry, ans_dict, md_text, idx)
-    commit_registry(args.path_repo, args.path_registry, args.username, ingest=True) 
+    catalog[args.dataid] = ans_dict
+    write_data(args.path_catalog, args.path_markdown, args.path_header, catalog)
+    commit_catalog(args.path_repo, args.path_catalog, args.path_markdown, args.username, ingest=True)
     
     if not ok_add or not ok_index:
         exit()

@@ -5,12 +5,13 @@ import glob
 import pathlib
 import yaml
 from datetime import datetime
-from .utils.frevasub import subfreva
-from .utils.mdio import read_data, write_data
+from .utils.freva_sub import subfreva
+from .utils.catalog_io import read_data, write_data
 from .utils.interactive import quitkeep, form
-from .utils.parser import confparser, remember, create_dict
-from .utils.frevacheck import frevacheck
-from .utils.commit import commit_registry
+from .utils.parser import confparser
+from .utils.dict_utils import remember, create_dict
+from .utils.freva_check import frevacheck
+from .utils.commit import commit_catalog
 
 def clintshare():
 
@@ -40,8 +41,8 @@ def clintshare():
 
     print("CLINTshare: Data sharing tool for CLINT members")
 
-    dataid = date.strftime("%d%m%Y.%H%M%S")
     userid = os.popen("echo $USER").read().strip()
+    dataid = "{}.{}".format(userid, date.strftime("%d%m%Y.%H%M%S"))
     username = os.popen("pinky -lb $USER").read().strip().split(":")[-1].strip()
 
     conf_dict = yaml.safe_load(open(conf_dir / "config.yml", "r"))
@@ -72,17 +73,17 @@ def clintshare():
         print("\nTo proceed with data sharing, it is required to answer the {} following questions.".format(n_queries))
         print("For each question, you can enter empty field for help or 'back' to go to the previous question.")
         quitkeep("Do you want to continue?")
-        ans_dict = {"Dataid": dataid}
-        index_data = True
+        ans_dict = {}
     else:
-        md_text, idx, ans_dict = read_data(conf_dict["path_registry"], args.update)
-        if idx is not None and userid == ans_dict["Userid"] and args.data_path == ans_dict["Data path"]:
+        catalog, ans_dict = read_data(conf_dict["path_catalog"], args.update)
+        if userid == ans_dict["Userid"] and args.data_path == ans_dict["Data path"]:
             print("\nFound data registered with the following information:\n", ans_dict)
             quitkeep("\nDo you want to update this data?")
         else:
-            raise Exception("Did not find any data registered with dataid {}, userid {} and data path {}."
-                    .format(args.update, userid, args.data_path))
+            raise Exception("Did not find any data registered with userid {} and data path {}."
+                    .format(userid, args.data_path))
 
+        dataid = args.update
         keys = [key for key in keys if key not in filter_dict]
     
     members = remember(files, args.member, args.regex, args.varpar)
@@ -90,8 +91,10 @@ def clintshare():
     ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)
 
     frevacheck(ans_dict, conf_dict["project"])
-    write_data(conf_dict["path_registry"], ans_dict, md_text, idx)
-    commit_registry(conf_dict["path_repo"], conf_dict["path_registry"], username, update=args.update, verbose=False)
+    catalog[dataid] = ans_dict
+    write_data(conf_dict["path_catalog"], conf_dict["path_markdown"], conf_dict["path_header"], catalog)
+    commit_catalog(conf_dict["path_repo"], conf_dict["path_catalog"], conf_dict["path_markdown"],
+                   username, update=args.update, verbose=False)
 
     print("\n* Data have been successfully registered!")
 

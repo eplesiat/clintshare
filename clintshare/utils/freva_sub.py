@@ -30,18 +30,19 @@ module load clint xces share
         variable = "-v '{}'".format(ans_dict["Variable"])
 
     if conf_dict["clean_tmp"]:
-        clean_tmp = "-c"
+        clean_tmp = "-t"
     else:
         clean_tmp = ""
-    
+
     slurmfile = "{}/slurm_{}.sh".format(conf_dict["path_tmp"], dataid)
     f = open(slurmfile, "w")
     print(header, file=f)
-    print("{} {} -p {} -i {} -m {} -e {} {} -n {} -j {} -g {} -r {} -d {} -u '{}' {}".format(cmd, ymlfile,
+    print("{} {} -p {} -i {} -m {} -e {} {} -n {} -j {} -r {} -c {} -h {} -k {} -d {} -u '{}' {}".format(cmd, ymlfile,
                 ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], variable,
-                conf_dict["nthreads"], conf_dict["project"], conf_dict["path_repo"], conf_dict["path_registry"],
-                ans_dict["Dataid"], username, clean_tmp), file=f)
+                conf_dict["nthreads"], conf_dict["project"], conf_dict["path_repo"], conf_dict["path_catalog"],
+                conf_dict["path_header"], conf_dict["path_markdown"], dataid, username, clean_tmp), file=f)
     f.close()
+    exit()
 
     os.system("sbatch {}".format(slurmfile))
     if conf_dict["clean_tmp"]:

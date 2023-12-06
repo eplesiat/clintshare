@@ -1,5 +1,7 @@
 ---
- path_registry:
+ path_markdown:
+ path_header:
+ path_catalog:
  path_repo:
  path_log:
  path_tmp:
