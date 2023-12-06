@@ -10,7 +10,7 @@ from .utils.catalog_io import read_data, write_data
 from .utils.interactive import quitkeep, form
 from .utils.parser import confparser
 from .utils.dict_utils import remember, create_dict
-from .utils.freva_check import frevacheck
+from .utils.freva_check import freva_check
 from .utils.commit import commit_catalog
 
 def clintshare():
@@ -90,7 +90,7 @@ def clintshare():
     ans_dict = create_dict(ans_dict, date, userid, username, args.data_path, files, keys)
     ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)
 
-    frevacheck(ans_dict, conf_dict["project"])
+    freva_check(ans_dict, conf_dict["project"], conf_dict["modules"])
     catalog[dataid] = ans_dict
     write_data(conf_dict["path_catalog"], conf_dict["path_markdown"], conf_dict["path_header"], catalog)
     commit_catalog(conf_dict["path_repo"], conf_dict["path_catalog"], conf_dict["path_markdown"],

@@ -19,7 +19,7 @@ def subfreva(conf_dict, ans_dict, files, members, username, dataid):
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user={conf_dict["email"]}
 
-module load clint xces share
+module load {conf_dict["modules"]}
 
 """
 

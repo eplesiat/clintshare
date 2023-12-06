@@ -6,6 +6,10 @@ authors = ["Étienne Plésiat"]
 license = "BSD 3-Clause"
 readme = "README.md"
 
+include = [
+  "clintshare/config/config.yml"
+]
+
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Science/Research',
