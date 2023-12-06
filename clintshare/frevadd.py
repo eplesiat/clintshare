@@ -27,7 +27,7 @@ def frevadd():
     parser.add_argument("-j", "--project", type=str, default=None, help="Project")
     parser.add_argument("-r", "--path_repo", type=str, default=None, help="Path of the git repository")
     parser.add_argument("-c", "--path_catalog", type=str, default=None, help="Path of the catalog")
-    parser.add_argument("-h", "--path_header", type=str, default=None, help="Path of the header")
+    parser.add_argument("-a", "--path_header", type=str, default=None, help="Path of the header")
     parser.add_argument("-k", "--path_markdown", type=str, default=None, help="Path of the markdown")
     parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
     parser.add_argument("-u", "--username", type=str, default=None, help="Username")

@@ -10,9 +10,6 @@ def read_data(path_catalog, dataid):
 
 def write_data(path_catalog, path_markdown, path_header, catalog):
 
-    # for key, val in catalog[dataid].items():
-    print(catalog)
-
     with open(path_catalog, "w") as f:
         fcntl.flock(f, fcntl.LOCK_EX)
         # yaml.dump(catalog, f, default_style='', sort_keys=False)
