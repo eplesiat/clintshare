@@ -1,0 +1,15 @@
+---
+ path_registry:
+ path_repo:
+ path_log:
+ path_tmp:
+ email:
+ project:
+ account:
+ partition:
+ clean_tmp: True
+ mem: 128
+ time: 08:00:00
+ nodelist: None
+ nthreads: 0
+ max_threads: 64
