@@ -38,7 +38,7 @@ def form(query_dict, ans_dict, help_dict, keys, userid):
             ans_dict[key] = ans
             k += 1
 
-    if ans_dict["Product"][:7] != userid:
+    if ans_dict["Product"][:len(userid)] != userid:
         ans_dict["Product"] = userid + "-" + ans_dict["Product"]
 
     return ans_dict
