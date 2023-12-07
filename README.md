@@ -6,6 +6,7 @@ Software to share CLINT data
 - python>=3.9.13
 - numpy>=1.21.5
 - PyYAML>=6.0
+- tqdm>=4.66.1
 
 ## Installation
 
