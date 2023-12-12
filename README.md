@@ -7,6 +7,8 @@ Software to share CLINT data
 - numpy>=1.21.5
 - PyYAML>=6.0
 - tqdm>=4.66.1
+- xarray>=2023.12.0
+- netcdf4>=1.6.5
 
 ## Installation
 

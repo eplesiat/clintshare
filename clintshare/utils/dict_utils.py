@@ -18,7 +18,7 @@ def remember(files, member, regex, varpar):
     members = [member for file in files]
     if regex is not None:
 
-        print("* List of generated ensemble members:")
+        print("\n* List of generated ensemble members:")
         for i in range(num_files):
             try:
                 imem = int(re.search(regex, os.path.basename(files[i])).group(1))
@@ -54,7 +54,7 @@ def calculate_size(files):
 
     return str(num_files), str(size_files)
 
-def create_dict(ans_dict, date, userid, username, data_path, files, keys):
+def create_dict(ans_dict, date, userid, username, variable, data_path, files, keys):
 
     num_files, size_files = calculate_size(files)
 
@@ -64,7 +64,8 @@ def create_dict(ans_dict, date, userid, username, data_path, files, keys):
         "Username": username,
         "Data path": data_path,
         "Number of added files": num_files,
-        "Total size (in MB)": size_files})
+        "Total size (in MB)": size_files,
+        "Variable": variable})
 
     #ans_dict = update_dict(ans_dict, "Data path", data_path, keep_same=True)
     #ans_dict = update_dict(ans_dict, "Number of added files", num_files, update=index_data)

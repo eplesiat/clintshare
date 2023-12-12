@@ -34,10 +34,10 @@ module load {conf_dict["modules"]}
     
     args = [ymlfile, ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], ans_dict["Variable"],
                 conf_dict["nthreads"], conf_dict["project"], conf_dict["path_repo"], conf_dict["path_catalog"],
-                conf_dict["path_header"], conf_dict["path_markdown"], dataid, conf_dict["add_method"], clean_tmp]
+                conf_dict["path_header"], conf_dict["path_markdown"], conf_dict["path_storage"], dataid, conf_dict["add_method"], clean_tmp]
     args = [str(arg).replace(" ", "-") for arg in args]
     
-    print("frevadd {} -p {} -i {} -m {} -e {} -v '{}' -n {} -j {} -r {} -c {} -a {} -k {} -d {} -w {} {} -u '{}'".format(*args, username), file=f)
+    print("frevadd {} -p {} -i {} -m {} -e {} -v '{}' -n {} -j {} -r {} -c {} -a {} -k {} -s{} -d {} -w {} {} -u '{}'".format(*args, username), file=f)
     f.close()
 
     os.system("sbatch {}".format(slurmfile))

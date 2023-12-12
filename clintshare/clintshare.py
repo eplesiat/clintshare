@@ -9,6 +9,7 @@ from .utils.freva_sub import subfreva
 from .utils.catalog_io import get_data, write_data
 from .utils.interactive import quitkeep, form
 from .utils.parser import confparser
+from .utils.checker import check_files
 from .utils.dict_utils import remember, create_dict
 from .utils.freva_check import freva_check
 from .utils.commit import commit_catalog
@@ -81,9 +82,10 @@ def clintshare():
         ans_dict = get_data(catalog, args.update, userid=userid, data_path=args.data_path)
         dataid = args.update
         keys = [key for key in keys if key not in filter_dict]
-   
+    
+    variable = check_files(files)
     members = remember(files, args.member, args.regex, args.varpar)
-    ans_dict = create_dict(ans_dict, date, userid, username, args.data_path, files, keys)
+    ans_dict = create_dict(ans_dict, date, userid, username, variable, args.data_path, files, keys)
     ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)
 
     freva_check(ans_dict, conf_dict["project"], conf_dict["modules"])

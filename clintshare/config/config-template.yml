@@ -3,6 +3,7 @@
  path_header:
  path_catalog:
  path_repo:
+ path_storage:
  path_log:
  path_tmp:
  modules:

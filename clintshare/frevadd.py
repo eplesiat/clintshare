@@ -29,6 +29,7 @@ def frevadd():
     parser.add_argument("-c", "--path_catalog", type=str, default=None, help="Path of the catalog")
     parser.add_argument("-a", "--path_header", type=str, default=None, help="Path of the header")
     parser.add_argument("-k", "--path_markdown", type=str, default=None, help="Path of the markdown")
+    parser.add_argument("-s", "--path_storage", type=str, default=None, help="Path of the storage")
     parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
     parser.add_argument("-u", "--username", type=str, default=None, help="Username")
     parser.add_argument("-w", "--add_method", type=str, default=None, help="Method to add files")
@@ -123,6 +124,8 @@ def frevadd():
     write_data(args.path_catalog, args.path_markdown, args.path_header, catalog)
     commit_catalog(args.path_repo, args.path_catalog, args.path_markdown, args.username, ingest=True)
     
+    exec("chmod -R g+rw {}/{}".format(args.path_storage, args.product))
+
     if not ok_add or not ok_index:
         exit()
     
