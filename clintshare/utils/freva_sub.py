@@ -23,12 +23,6 @@ module load {conf_dict["modules"]}
 
 """
 
-    cmd = "frevadd"
-    if ans_dict["Variable"] is None:
-        variable = ""
-    else:
-        variable = "-v '{}'".format(ans_dict["Variable"])
-
     if conf_dict["clean_tmp"]:
         clean_tmp = "-t"
     else:
@@ -37,10 +31,13 @@ module load {conf_dict["modules"]}
     slurmfile = "{}/slurm_{}.sh".format(conf_dict["path_tmp"], dataid)
     f = open(slurmfile, "w")
     print(header, file=f)
-    print("{} {} -p {} -i {} -m {} -e {} {} -n {} -j {} -r {} -c {} -a {} -k {} -d {} -u '{}' {}".format(cmd, ymlfile,
-                ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], variable,
+    
+    args = [ymlfile, ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], ans_dict["Variable"],
                 conf_dict["nthreads"], conf_dict["project"], conf_dict["path_repo"], conf_dict["path_catalog"],
-                conf_dict["path_header"], conf_dict["path_markdown"], dataid, username, clean_tmp), file=f)
+                conf_dict["path_header"], conf_dict["path_markdown"], dataid, conf_dict["add_method"], clean_tmp]
+    args = [str(arg).replace(" ", "-") for arg in args]
+    
+    print("frevadd {} -p {} -i {} -m {} -e {} -v '{}' -n {} -j {} -r {} -c {} -a {} -k {} -d {} -w {} {} -u '{}'".format(*args, username), file=f)
     f.close()
 
     os.system("sbatch {}".format(slurmfile))

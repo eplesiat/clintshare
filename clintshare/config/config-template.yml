@@ -10,6 +10,7 @@
  project:
  account:
  partition:
+ add_method: copy
  clean_tmp: True
  mem: 128
  time: 08:00:00

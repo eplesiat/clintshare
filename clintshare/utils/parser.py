@@ -4,13 +4,11 @@ def strparser(arg):
 
 def argvar(arg):
 
-    if arg is None or arg == "":
-        variable = ""
+    if arg:
+        return "variable={}".format(arg)
     else:
-        variable = "variable={}".format(arg)
+        return ""
     
-    return variable
-
 def confparser(conf_dict, args):
 
     args_dict = args.__dict__

@@ -6,7 +6,7 @@ from .utils.parser import strparser
 import os
 from threading import Thread
 import numpy as np
-from .utils.catalog_io import read_data, write_data
+from .utils.catalog_io import get_data, write_data
 from .utils.interactive import exec
 from .utils.parser import argvar
 from .utils.commit import commit_catalog
@@ -31,6 +31,7 @@ def frevadd():
     parser.add_argument("-k", "--path_markdown", type=str, default=None, help="Path of the markdown")
     parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
     parser.add_argument("-u", "--username", type=str, default=None, help="Username")
+    parser.add_argument("-w", "--add_method", type=str, default=None, help="Method to add files")
     parser.add_argument("-t", "--clean_tmp", action='store_true', help="Clean temporary files")
     args = parser.parse_args()
     
@@ -61,19 +62,24 @@ def frevadd():
 
 
     class add_data(Thread):
-        def __init__(self, attributes, variable, member, file):
+        def __init__(self, attributes, variable, member, file, how):
             Thread.__init__(self)
             self.res = None
             self.attributes = attributes
             self.variable = variable
             self.member = member
             self.file = file
+            self.how = how
 
         def run(self):
-            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {} --variable '{}' --ensemble '{}' {}"
-                    .format(*self.attributes, self.variable, self.member, self.file))
+            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {} {} --ensemble '{}' --how {} {}"
+                    .format(*self.attributes, self.variable, self.member, self.how, self.file))
 
     attributes = [args.product, args.project, args.institute, args.model, args.experiment]
+    if args.variable and args.variable != "None":
+        variable = "--variable '{}'".format(args.variable)
+    else:
+        variable = ""
 
     start_time = datetime.now()
 
@@ -81,7 +87,7 @@ def frevadd():
     for batch in batches:
         threads = []
         for idx in batch:
-            threads.append(add_data(attributes, args.variable, *memfiles[idx]))
+            threads.append(add_data(attributes, variable, *memfiles[idx], args.add_method))
             threads[-1].start()
 
         for thread in threads:
@@ -90,7 +96,8 @@ def frevadd():
         ok_add, count_add = check_status(threads, ok_add, count_add)
 
     print("\n* Number of files CMORized: {}".format(count_add))
-    catalog, ans_dict = read_data(args.path_catalog, args.dataid)
+    catalog = yaml.safe_load(open(args.path_catalog))
+    ans_dict = get_data(catalog, args.dataid) 
 
     if not ok_add:
         ans_dict["Indexed"] = get_status(count_add, num_files, start_time)

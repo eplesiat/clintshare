@@ -6,7 +6,7 @@ import pathlib
 import yaml
 from datetime import datetime
 from .utils.freva_sub import subfreva
-from .utils.catalog_io import read_data, write_data
+from .utils.catalog_io import get_data, write_data
 from .utils.interactive import quitkeep, form
 from .utils.parser import confparser
 from .utils.dict_utils import remember, create_dict
@@ -26,12 +26,13 @@ def clintshare():
     parser.add_argument("-l", "--nodelist", type=str, default=None, help="NODES")
     parser.add_argument("-p", "--partition", type=str, default=None, help="Partition name")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
+    parser.add_argument("-w", "--add_method", type=str, default=None, help="Method to add files with Freva (copy,move,symlink,link)")
     parser.add_argument("-v", "--varpar", type=str, default="r", choices=["r", "i", "p"], help="Character defining the varying member parameter")
     parser.add_argument("-r", "--regex", type=str, default=None, help="Regex expression to parse ensemble member "
                                                                       "from filenames (e.g., .*mem(\d+).*)")
     parser.add_argument("-m", "--member", type=str, default=None, help="Ensemble member used for all files")
     args = parser.parse_args()
-
+    
     path_dir = pathlib.Path(__file__).parent
     conf_dir = path_dir / "config"
     query_dict, filter_dict = yaml.safe_load(open(conf_dir / "query.yml", "r"))
@@ -50,12 +51,14 @@ def clintshare():
     conf_dict["frevadd"] = pathlib.Path(__file__).parent.parent
 
     help_dict = yaml.safe_load(open(conf_dir / "help.yml", "r"))
-   
+    
+    catalog = yaml.safe_load(open(conf_dict["path_catalog"]))
+
     if os.path.isdir(args.data_path):
         args.data_path += "/**"
     files = [file for file in glob.glob(args.data_path, recursive=True) if file[-3:] == ".nc"]
     num_files = len(files)
-
+    
     assert len(files) != 0, "No NetCDF files found in provided paths."
     print("\n* {} NetCDF files found in provided paths.".format(num_files))
 
@@ -68,24 +71,17 @@ def clintshare():
     files = [os.path.abspath(file) for file in files]
 
     md_text, idx = None, None
-    
+   
     if args.update is None:
         print("\nTo proceed with data sharing, it is required to answer the {} following questions.".format(n_queries))
         print("For each question, you can enter empty field for help or 'back' to go to the previous question.")
         quitkeep("Do you want to continue?")
         ans_dict = {}
     else:
-        catalog, ans_dict = read_data(conf_dict["path_catalog"], args.update)
-        if userid == ans_dict["Userid"] and args.data_path == ans_dict["Data path"]:
-            print("\nFound data registered with the following information:\n", ans_dict)
-            quitkeep("\nDo you want to update this data?")
-        else:
-            raise Exception("Did not find any data registered with userid {} and data path {}."
-                    .format(userid, args.data_path))
-
+        ans_dict = get_data(catalog, args.update, userid=userid, data_path=args.data_path)
         dataid = args.update
         keys = [key for key in keys if key not in filter_dict]
-    
+   
     members = remember(files, args.member, args.regex, args.varpar)
     ans_dict = create_dict(ans_dict, date, userid, username, args.data_path, files, keys)
     ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)

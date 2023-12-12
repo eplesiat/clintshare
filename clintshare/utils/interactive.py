@@ -22,7 +22,7 @@ def form(query_dict, ans_dict, help_dict, keys, userid):
     k = 0
     while k < n_queries:
         key = keys[k]
-        ans = input("\n[{}/{}] {}:\n{}\r".format(k + 1, n_queries, query_dict[key], ans_dict[key])).strip()
+        ans = input("\n[{}/{}] {}:\n{}\r".format(k + 1, n_queries, query_dict[key], str(ans_dict[key] or ''))).strip()
         if ans == "":
             if help_dict[key] is None:
                 ans_dict[key] = ans

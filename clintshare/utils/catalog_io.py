@@ -1,12 +1,17 @@
-import yaml
 import fcntl
 
-def read_data(path_catalog, dataid):
-    catalog = yaml.safe_load(open(path_catalog))
+def get_data(catalog, dataid, userid=None, data_path=None):
     if dataid in catalog:
-        return catalog, catalog[dataid]
+        ans_dict = catalog[dataid]
+        if (userid is None or userid == ans_dict["Userid"]) and (data_path is None or data_path == ans_dict["Data path"]):
+            print("\nFound data registered with the following information:\n", ans_dict)
+            return ans_dict
+        else:
+            raise Exception("Did not find any data registered with userid {} and data path {}."
+                    .format(userid, data_path))
     else:
         raise Exception("Could not find dataid {} in catalog.".format(dataid))
+
 
 def write_data(path_catalog, path_markdown, path_header, catalog):
 
@@ -17,7 +22,7 @@ def write_data(path_catalog, path_markdown, path_header, catalog):
         for dataid in catalog:
             print(" {}:".format(dataid), file=f)
             for key, val in catalog[dataid].items():
-                print("  {}: {}".format(key, val), file=f)
+                print("  {}: {}".format(key, str(val or '')), file=f)
         fcntl.flock(f, fcntl.LOCK_UN)
 
     with open(path_markdown, "w") as f:
@@ -28,5 +33,5 @@ def write_data(path_catalog, path_markdown, path_header, catalog):
             print("\n- Dataid: {}".format(dataid), file=f)
             for key, val in catalog[dataid].items():
                 if key != "Title":
-                    print("- {}: {}".format(key, val), file=f)
+                    print("- {}: {}".format(key, str(val or '')), file=f)
         fcntl.flock(f, fcntl.LOCK_UN)
