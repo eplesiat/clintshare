@@ -21,19 +21,19 @@ def clintshare():
     parser = argparse.ArgumentParser()
     parser.add_argument('data_path', type=str, help="Path or pattern of paths of the directories or NetCDF files to be shared")
     parser.add_argument('-u', '--update', type=str, default=None, help="Update data using data_id")
-    parser.add_argument("-a", "--account", type=str, default=None, help="Account name")
     parser.add_argument("--mem", type=str, default=None, help="Memory in MB")
     parser.add_argument("-t", "--time", type=str, default=None, help="Time in h:mn:s")
     parser.add_argument("-l", "--nodelist", type=str, default=None, help="NODES")
     parser.add_argument("-p", "--partition", type=str, default=None, help="Partition name")
     parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
-    parser.add_argument("-w", "--add_method", type=str, default=None, help="Method to add files with Freva (copy,move,symlink,link)")
+    parser.add_argument("-a", "--add_method", type=str, default=None, help="Method to add files with Freva (copy,move,symlink,link)")
     parser.add_argument("-v", "--varpar", type=str, default="r", choices=["r", "i", "p"], help="Character defining the varying member parameter")
-    parser.add_argument("-r", "--regex", type=str, default=None, help="Regex expression to parse ensemble member "
+    parser.add_argument("-e", "--ens_regex", type=str, default=None, help="Regex expression to parse ensemble member "
                                                                       "from filenames (e.g., .*mem(\d+).*)")
     parser.add_argument("-m", "--member", type=str, default=None, help="Ensemble member used for all files")
+    parser.add_argument("-r", "--path_repo", type=str, default=None, help="Path of the repository")
     args = parser.parse_args()
-    
+
     path_dir = pathlib.Path(__file__).parent
     conf_dir = path_dir / "config"
     query_dict, filter_dict = yaml.safe_load(open(conf_dir / "query.yml", "r"))
@@ -49,10 +49,11 @@ def clintshare():
 
     conf_dict = yaml.safe_load(open(conf_dir / "config.yml", "r"))
     conf_dict = confparser(conf_dict, args)
-    conf_dict["frevadd"] = pathlib.Path(__file__).parent.parent
 
     help_dict = yaml.safe_load(open(conf_dir / "help.yml", "r"))
     
+    for path in ("path_catalog", "path_markdown", "path_header"):
+        conf_dict[path] = "{}/{}".format(conf_dict["path_repo"], conf_dict[path])
     catalog = yaml.safe_load(open(conf_dict["path_catalog"]))
 
     if os.path.isdir(args.data_path):
@@ -84,7 +85,7 @@ def clintshare():
         keys = [key for key in keys if key not in filter_dict]
     
     variable = check_files(files)
-    members = remember(files, args.member, args.regex, args.varpar)
+    members = remember(files, args.member, args.ens_regex, args.varpar)
     ans_dict = create_dict(ans_dict, date, userid, username, variable, args.data_path, files, keys)
     ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)
 
@@ -97,7 +98,7 @@ def clintshare():
     print("\n* Data have been successfully registered!")
 
     quitkeep("Do you want to (re-)ingest the files using Freva?")
-    subfreva(conf_dict, ans_dict, files, members, username, dataid)
+    subfreva(conf_dict, ans_dict, files, members, dataid)
     print("* Data ingestion is running in the background...")
 
 if __name__ == "__main__":
