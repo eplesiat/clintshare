@@ -86,25 +86,21 @@ def frevadd():
     print("\n* Number of files CMORized: {}".format(count_add))
     catalog = yaml.safe_load(open(conf_dict["path_catalog"]))
     
-    if not ok_add:
-        _, ans_dict["Indexed"] = get_status(count_add, num_files, start_time)
-    else:
-        files = exec("freva databrowser product={} project={} institute={} model={} experiment={} variable={}"
-                    .format(*attributes)).split()
+    files = exec("freva databrowser product={} project={} institute={} model={} experiment={} variable={}"
+                .format(*attributes)).split()
         
-        end_time = datetime.now()
-        print("\n* Start indexing time:", start_time)
-        print("* End indexing time:", end_time)
+    end_time = datetime.now()
+    print("\n* Start indexing time:", start_time)
+    print("* End indexing time:", end_time)
 
-        count_index = 0
-        for file in files:
-            date = datetime.fromtimestamp(os.path.getmtime(file))
-            if date > start_time and date < end_time:
-                count_index += 1
+    count_index = 0
+    for file in files:
+        date = datetime.fromtimestamp(os.path.getmtime(file))
+        if date > start_time and date < end_time:
+            count_index += 1
 
-        print("\n* Number of files indexed: {}".format(count_index))
-
-        ok_index, ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
+    print("\n* Number of files indexed: {}".format(count_index))
+    ok_index, ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
 
     ans_dict["Indexed"] += link
     catalog[args.dataid] = ans_dict
