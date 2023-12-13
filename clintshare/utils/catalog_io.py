@@ -1,3 +1,4 @@
+import yaml
 import fcntl
 
 def get_data(catalog, dataid, userid=None, data_path=None):
@@ -11,6 +12,16 @@ def get_data(catalog, dataid, userid=None, data_path=None):
                     .format(userid, data_path))
     else:
         raise Exception("Could not find dataid {} in catalog.".format(dataid))
+
+def write_yaml(content, path_dir, varname, dataid):
+    filename = "{}/{}_{}.yml".format(path_dir, varname, dataid)
+    with open(filename, "w") as f:
+        if isinstance(content, list):
+            yaml.dump(content, f)
+        else:
+            for key, val in content.items():
+                print("{}: {}".format(key, val), file=f)
+    return filename
 
 
 def write_data(path_catalog, path_markdown, path_header, catalog):

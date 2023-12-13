@@ -1,11 +1,12 @@
 import os
-import yaml
+from .catalog_io import write_yaml
 
-def subfreva(conf_dict, ans_dict, files, members, username, dataid):
+def subfreva(conf_dict, ans_dict, files, members, dataid):
     
-    ymlfile = "{}/memfiles_{}.yml".format(conf_dict["path_tmp"], dataid)
-    with open(ymlfile, "w") as f:
-        yaml.dump([list(i) for i in zip(members, files)], f)
+    memfile = write_yaml([list(i) for i in zip(members, files)],
+            conf_dict["path_tmp"], "memfile", dataid)
+    ansfile = write_yaml(ans_dict, conf_dict["path_tmp"], "ansfile", dataid)
+    confile = write_yaml(conf_dict, conf_dict["path_tmp"], "confile", dataid)
 
     header = f"""#!/usr/bin/env bash
     
@@ -20,24 +21,14 @@ def subfreva(conf_dict, ans_dict, files, members, username, dataid):
 #SBATCH --mail-user={conf_dict["email"]}
 
 module load {conf_dict["modules"]}
+source activate {os.environ["CONDA_PREFIX"]}
 
 """
-
-    if conf_dict["clean_tmp"]:
-        clean_tmp = "-t"
-    else:
-        clean_tmp = ""
 
     slurmfile = "{}/slurm_{}.sh".format(conf_dict["path_tmp"], dataid)
     f = open(slurmfile, "w")
     print(header, file=f)
-    
-    args = [ymlfile, ans_dict["Product"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], ans_dict["Variable"],
-                conf_dict["nthreads"], conf_dict["project"], conf_dict["path_repo"], conf_dict["path_catalog"],
-                conf_dict["path_header"], conf_dict["path_markdown"], conf_dict["path_storage"], dataid, conf_dict["add_method"], clean_tmp]
-    args = [str(arg).replace(" ", "-") for arg in args]
-    
-    print("frevadd {} -p {} -i {} -m {} -e {} -v '{}' -n {} -j {} -r {} -c {} -a {} -k {} -s{} -d {} -w {} {} -u '{}'".format(*args, username), file=f)
+    print("frevadd {} {} {} {}".format(memfile, ansfile, confile, dataid), file=f)
     f.close()
 
     os.system("sbatch {}".format(slurmfile))

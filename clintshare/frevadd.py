@@ -17,32 +17,23 @@ def split_list(lst, n):
 def frevadd():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('ymlfile', type=str, help="Yaml containing the NetCDF files and their associated members to be ingested with Freva")
-    parser.add_argument('-p', '--product', type=str, default=None, help="Product of original data")
-    parser.add_argument("-i", "--institute", type=str, default=None, help="Institute of original data")
-    parser.add_argument("-m", "--model", type=str, default=None, help="Model of original data")
-    parser.add_argument("-e", "--experiment", type=str, default=None, help="Experiment of original data")
-    parser.add_argument("-v", "--variable", type=str, default=None, help="Variable of original data")
-    parser.add_argument("-n", "--nthreads", type=int, default=None, help="Number of threads")
-    parser.add_argument("-j", "--project", type=str, default=None, help="Project")
-    parser.add_argument("-r", "--path_repo", type=str, default=None, help="Path of the git repository")
-    parser.add_argument("-c", "--path_catalog", type=str, default=None, help="Path of the catalog")
-    parser.add_argument("-a", "--path_header", type=str, default=None, help="Path of the header")
-    parser.add_argument("-k", "--path_markdown", type=str, default=None, help="Path of the markdown")
-    parser.add_argument("-s", "--path_storage", type=str, default=None, help="Path of the storage")
-    parser.add_argument("-d", "--dataid", type=str, default=None, help="Dataid")
-    parser.add_argument("-u", "--username", type=str, default=None, help="Username")
-    parser.add_argument("-w", "--add_method", type=str, default=None, help="Method to add files")
-    parser.add_argument("-t", "--clean_tmp", action='store_true', help="Clean temporary files")
+    parser.add_argument('memfile', type=str, help="Yaml containing the NetCDF files and their associated members to be ingested with Freva")
+    parser.add_argument('ansfile', type=str, help="Yaml containing the information about the data")
+    parser.add_argument('confile', type=str, help="Yaml containing the configuration parameters")
+    parser.add_argument('dataid', type=str, help="Dataid")
     args = parser.parse_args()
     
-    with open(args.ymlfile, "r") as f:
+    with open(args.memfile, "r") as f:
         memfiles = yaml.safe_load(f)
+    with open(args.ansfile, "r") as f:
+        ans_dict = yaml.safe_load(f)
+    with open(args.confile, "r") as f:
+        conf_dict = yaml.safe_load(f)
 
     num_files = len(memfiles)
     print("\n* Number of files: {}".format(num_files))
     #batches = np.array_split(np.arange(num_files), args.nthreads)
-    batches = split_list(np.arange(num_files), args.nthreads)
+    batches = split_list(np.arange(num_files), conf_dict["nthreads"])
 
     def check_status(threads, ok_add, count_add):
         print("\n* Log freva add:")
@@ -63,32 +54,28 @@ def frevadd():
 
 
     class add_data(Thread):
-        def __init__(self, attributes, variable, member, file, how):
+        def __init__(self, attributes, member, file, how):
             Thread.__init__(self)
             self.res = None
             self.attributes = attributes
-            self.variable = variable
             self.member = member
             self.file = file
             self.how = how
 
         def run(self):
-            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {} {} --ensemble '{}' --how {} {}"
-                    .format(*self.attributes, self.variable, self.member, self.how, self.file))
+            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {} --variable {} --ensemble '{}' --how {} {}"
+                    .format(*self.attributes, self.member, self.how, self.file))
 
-    attributes = [args.product, args.project, args.institute, args.model, args.experiment]
-    if args.variable and args.variable != "None":
-        variable = "--variable '{}'".format(args.variable)
-    else:
-        variable = ""
+    attributes = [ans_dict["Product"], conf_dict["project"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], ans_dict["Variable"]]
+    link = " - [Link Freva]({}/solr/data-browser/?product={}&project={}&institute={}&model={}&experiment={}&variable={})"
+    link = link.format(conf_dict["freva_url"], *attributes)
 
     start_time = datetime.now()
-
     ok_add, count_add = True, 0
     for batch in batches:
         threads = []
         for idx in batch:
-            threads.append(add_data(attributes, variable, *memfiles[idx], args.add_method))
+            threads.append(add_data(attributes, *memfiles[idx], conf_dict["add_method"]))
             threads[-1].start()
 
         for thread in threads:
@@ -97,40 +84,38 @@ def frevadd():
         ok_add, count_add = check_status(threads, ok_add, count_add)
 
     print("\n* Number of files CMORized: {}".format(count_add))
-    catalog = yaml.safe_load(open(args.path_catalog))
-    ans_dict = get_data(catalog, args.dataid) 
-
-    if not ok_add:
-        ans_dict["Indexed"] = get_status(count_add, num_files, start_time)
-    else:
-        files = exec("freva databrowser product={} project={} institute={} model={} experiment={} {}"
-                    .format(*attributes, argvar(args.variable))).split()
-        
-        end_time = datetime.now()
-        print("\n* Start indexing time:", start_time)
-        print("* End indexing time:", end_time)
-
-        count_index = 0
-        for file in files:
-            date = datetime.fromtimestamp(os.path.getmtime(file))
-            if date > start_time and date < end_time:
-                count_index += 1
-
-        print("\n* Number of files indexed: {}".format(count_index))
-
-        ok_index, ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
-
-    catalog[args.dataid] = ans_dict
-    write_data(args.path_catalog, args.path_markdown, args.path_header, catalog)
-    commit_catalog(args.path_repo, args.path_catalog, args.path_markdown, args.username, ingest=True)
+    catalog = yaml.safe_load(open(conf_dict["path_catalog"]))
     
-    exec("chmod -R g+rw {}/{}".format(args.path_storage, args.product))
+    files = exec("freva databrowser product={} project={} institute={} model={} experiment={} variable={}"
+                .format(*attributes)).split()
+        
+    end_time = datetime.now()
+    print("\n* Start indexing time:", start_time)
+    print("* End indexing time:", end_time)
+
+    count_index = 0
+    for file in files:
+        date = datetime.fromtimestamp(os.path.getmtime(file))
+        if date > start_time and date < end_time:
+            count_index += 1
+
+    print("\n* Number of files indexed: {}".format(count_index))
+    ok_index, ans_dict["Indexed"] = get_status(count_index, num_files, end_time)
+
+    ans_dict["Indexed"] += link
+    catalog[args.dataid] = ans_dict
+    write_data(conf_dict["path_catalog"], conf_dict["path_markdown"], conf_dict["path_header"], catalog)
+    commit_catalog(conf_dict["path_repo"], conf_dict["path_catalog"], conf_dict["path_markdown"], ans_dict["Username"], ingest=True)
+    
+    exec("chmod -R g+rw {}/{}".format(conf_dict["path_storage"], ans_dict["Product"]))
 
     if not ok_add or not ok_index:
         exit()
     
-    if args.clean_tmp:
-        os.remove(args.ymlfile)
+    if conf_dict["clean_tmp"]:
+        os.remove(args.memfile)
+        os.remove(args.ansfile)
+        os.remove(args.confile)
 
 if __name__ == "__main__":
     frevadd()
