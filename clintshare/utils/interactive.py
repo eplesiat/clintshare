@@ -17,12 +17,23 @@ def ans2bool(text):
     else:
         return True
 
+def inputx(prompt, placeholder):
+    import readline
+    def hook():
+        readline.insert_text(placeholder)
+        readline.redisplay()
+
+    readline.set_pre_input_hook(hook)
+    user_input = input(prompt)
+
+    return user_input
+
 def form(query_dict, ans_dict, help_dict, keys, userid):
     n_queries = len(keys)
     k = 0
     while k < n_queries:
         key = keys[k]
-        ans = input("\n[{}/{}] {}:\n{}\r".format(k + 1, n_queries, query_dict[key], str(ans_dict[key] or ''))).strip()
+        ans = inputx("\n[{}/{}] {}:\n".format(k + 1, n_queries, query_dict[key]), str(ans_dict[key] or '')).strip()
         if ans == "":
             if help_dict[key] is None:
                 ans_dict[key] = ans
