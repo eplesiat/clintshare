@@ -84,9 +84,9 @@ def clintshare():
         dataid = args.update
         keys = [key for key in keys if key not in filter_dict]
     
-    variable = check_files(files)
+    variable, time_freq = check_files(files)
     members = remember(files, args.member, args.ens_regex, args.varpar)
-    ans_dict = create_dict(ans_dict, date, userid, username, variable, args.data_path, files, keys)
+    ans_dict = create_dict(ans_dict, date, userid, username, variable, time_freq, args.data_path, files, keys)
     ans_dict = form(query_dict, ans_dict, help_dict, keys, userid)
 
     freva_check(ans_dict, conf_dict["project"], conf_dict["modules"])

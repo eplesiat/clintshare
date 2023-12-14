@@ -63,11 +63,19 @@ def frevadd():
             self.how = how
 
         def run(self):
-            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {} --variable {} --ensemble '{}' --how {} {}"
+            self.res = exec("freva user-data add {} --project {} --institute {} --model {} --experiment {}"\
+                    " --variable {} --time-frequency {} --ensemble '{}' --how {} {}"
                     .format(*self.attributes, self.member, self.how, self.file))
 
-    attributes = [ans_dict["Product"], conf_dict["project"], ans_dict["Institute"], ans_dict["Model"], ans_dict["Experiment"], ans_dict["Variable"]]
-    link = " - [Link Freva]({}/solr/data-browser/?product={}&project={}&institute={}&model={}&experiment={}&variable={})"
+    attributes = [ans_dict["Product"],
+            conf_dict["project"],
+            ans_dict["Institute"],
+            ans_dict["Model"],
+            ans_dict["Experiment"],
+            ans_dict["Variable"],
+            ans_dict["Time frequency"]]
+
+    link = " - [Link Freva]({}/solr/data-browser/?product={}&project={}&institute={}&model={}&experiment={}&variable={}&time_frequency={})"
     link = link.format(conf_dict["freva_url"], *attributes)
 
     start_time = datetime.now()
@@ -86,7 +94,7 @@ def frevadd():
     print("\n* Number of files CMORized: {}".format(count_add))
     catalog = yaml.safe_load(open(conf_dict["path_catalog"]))
     
-    files = exec("freva databrowser product={} project={} institute={} model={} experiment={} variable={}"
+    files = exec("freva databrowser product={} project={} institute={} model={} experiment={} variable={} time_frequency={}"
                 .format(*attributes)).split()
         
     end_time = datetime.now()
