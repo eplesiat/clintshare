@@ -54,7 +54,7 @@ def calculate_size(files):
 
     return str(num_files), str(size_files)
 
-def create_dict(ans_dict, date, userid, username, variable, time_freq, data_path, files, keys):
+def create_dict(ans_dict, date, userid, username, contacts_url, variable, time_freq, data_path, files, keys):
 
     num_files, size_files = calculate_size(files)
 
@@ -62,6 +62,7 @@ def create_dict(ans_dict, date, userid, username, variable, time_freq, data_path
         "Modified date": date.strftime("%d/%m/%Y %H:%M:%S"),
         "Userid": userid,
         "Username": username,
+        "Contact": "[email]({}#{})".format(contacts_url, username.replace(" ","-").lower()),
         "Data path": data_path,
         "Number of added files": num_files,
         "Total size (in MB)": size_files,

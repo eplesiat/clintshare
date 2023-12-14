@@ -7,6 +7,8 @@
  path_log:
  path_tmp:
  modules:
+ freva_url:
+ contacts_url:
  email:
  project:
  account:
