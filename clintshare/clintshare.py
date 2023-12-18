@@ -4,10 +4,9 @@ import os
 import glob
 import pathlib
 import yaml
-from datetime import datetime
 from .utils.freva_sub import subfreva
 from .utils.catalog_io import get_data, write_data
-from .utils.interactive import quitkeep, form
+from .utils.interactive import get_id, quitkeep, form
 from .utils.parser import confparser
 from .utils.checker import check_files
 from .utils.dict_utils import remember, create_dict
@@ -15,8 +14,6 @@ from .utils.freva_check import freva_check
 from .utils.commit import commit_catalog
 
 def clintshare():
-
-    date = datetime.now()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('data_path', type=str, help="Path or pattern of paths of the directories or NetCDF files to be shared")
@@ -43,10 +40,8 @@ def clintshare():
 
     print("CLINTshare: Data sharing tool for CLINT members")
 
-    userid = os.popen("echo $USER").read().strip()
-    dataid = "{}.{}".format(userid, date.strftime("%d%m%Y.%H%M%S"))
-    username = os.popen("pinky -lb $USER").read().strip().split(":")[-1].strip()
-
+    date, username, userid, dataid = get_id()
+    
     conf_dict = yaml.safe_load(open(conf_dir / "config.yml", "r"))
     conf_dict = confparser(conf_dict, args)
 
@@ -93,7 +88,7 @@ def clintshare():
     catalog[dataid] = ans_dict
     write_data(conf_dict["path_catalog"], conf_dict["path_markdown"], conf_dict["path_header"], catalog)
     commit_catalog(conf_dict["path_repo"], conf_dict["path_catalog"], conf_dict["path_markdown"],
-                   username, update=args.update, verbose=False)
+                   username, "Add new data to catalog", update=args.update, verbose=False)
 
     print("\n* Data have been successfully registered!")
 

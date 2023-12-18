@@ -1,6 +1,7 @@
+import os
+from datetime import datetime
 
 def exec(instruc, verbose=True):
-    import os
     if verbose:
         print(">", instruc)
     return os.popen(instruc).read()
@@ -27,6 +28,13 @@ def inputx(prompt, placeholder):
     user_input = input(prompt)
 
     return user_input
+
+def get_id():
+    date = datetime.now()
+    username = os.popen("pinky -lb $USER").read().strip().split(":")[-1].strip()
+    userid = os.popen("echo $USER").read().strip()
+    dataid = "{}.{}".format(userid, date.strftime("%d%m%Y.%H%M%S"))
+    return date, username, userid, dataid
 
 def form(query_dict, ans_dict, help_dict, keys, userid):
     n_queries = len(keys)

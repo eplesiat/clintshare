@@ -24,17 +24,18 @@ def write_yaml(content, path_dir, varname, dataid):
     return filename
 
 
-def write_data(path_catalog, path_markdown, path_header, catalog):
+def write_data(path_catalog, path_markdown, path_header, catalog, write_catalog=True):
 
-    with open(path_catalog, "w") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        # yaml.dump(catalog, f, default_style='', sort_keys=False)
-        print("---", file=f)
-        for dataid in catalog:
-            print(" {}:".format(dataid), file=f)
-            for key, val in catalog[dataid].items():
-                print("  {}: {}".format(key, str(val or '')), file=f)
-        fcntl.flock(f, fcntl.LOCK_UN)
+    if write_catalog:
+        with open(path_catalog, "w") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            # yaml.dump(catalog, f, default_style='', sort_keys=False)
+            print("---", file=f)
+            for dataid in catalog:
+                print(" {}:".format(dataid), file=f)
+                for key, val in catalog[dataid].items():
+                    print("  {}: {}".format(key, str(val or '')), file=f)
+            fcntl.flock(f, fcntl.LOCK_UN)
 
     with open(path_markdown, "w") as f:
         fcntl.flock(f, fcntl.LOCK_EX)

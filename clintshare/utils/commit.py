@@ -1,18 +1,13 @@
 
 from .interactive import exec
 
-def commit_catalog(path_repo, path_catalog, path_markdown, username, update=None, ingest=False, verbose=True):
+def commit_catalog(path_repo, path_catalog, path_markdown, username, message, update=None, verbose=True):
     print("\n* Committing changes to catalog")
     
     assert update is None or ingest is False
     
-    if ingest is False:
-        if update is None:
-            message =  "Add new data to catalog"
-        else:
-            message =  "Update existing data in catalog"
-    else:
-        message =  "Change status of data in catalog"
+    if update is not None:
+        message =  "Update existing data in catalog"
    
     cmd = "git -C {}".format(path_repo)
     cmd = "module load git; {} config user.name '{}' ; {} config user.email None; {}".format(cmd, username, cmd, cmd)

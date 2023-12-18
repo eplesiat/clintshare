@@ -113,7 +113,8 @@ def frevadd():
     ans_dict["Indexed"] += link
     catalog[args.dataid] = ans_dict
     write_data(conf_dict["path_catalog"], conf_dict["path_markdown"], conf_dict["path_header"], catalog)
-    commit_catalog(conf_dict["path_repo"], conf_dict["path_catalog"], conf_dict["path_markdown"], ans_dict["Username"], ingest=True)
+    commit_catalog(conf_dict["path_repo"], conf_dict["path_catalog"], conf_dict["path_markdown"], 
+            ans_dict["Username"], "Change status of data in catalog")
     
     exec("chmod -R g+rw {}/{}".format(conf_dict["path_storage"], ans_dict["Product"]))
 
