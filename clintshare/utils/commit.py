@@ -4,8 +4,6 @@ from .interactive import exec
 def commit_catalog(path_repo, path_catalog, path_markdown, username, message, update=None, verbose=True):
     print("\n* Committing changes to catalog")
     
-    assert update is None or ingest is False
-    
     if update is not None:
         message =  "Update existing data in catalog"
    
